@@ -22,12 +22,16 @@ export PATH="$HOME/"'.platformsh/bin':"$PATH"
 if [ -f "$HOME/"'.platformsh/shell-config.rc' ]; then . "$HOME/"'.platformsh/shell-config.rc'; fi # END SNIPPET
 
 # Load secrets
-test -r .env && . .env
+test -r $HOME/.env && . $HOME/.env
 
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git --color=always'
+#export CLUTTER_BACKEND=wayland
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git --color=always"
 export FZF_DEFAULT_OPTS="--ansi"
+#export GDK_BACKEND=wayland
+export MOZ_ENABLE_WAYLAND=1
 export PATH="$HOME/.symfony/bin:$PYTHONPATH:$PATH"
+export QT_QPA_PLATFORM=wayland
 
 alias bc='bc -l'
 alias cat='bat -pp --theme="Nord"'
@@ -42,7 +46,6 @@ alias du='dust'
 alias find='fd'
 alias firewall='sudo nft list ruleset'
 alias grep='rg -i -n -uuu'
-alias htop='btm'
 #alias ls='exa -G  --color auto --icons -a -s type'
 alias ls='exa -l --color always --icons -a -s type'
 alias mkdir='mkdir -pv'
@@ -54,10 +57,9 @@ alias ps='procs'
 #alias ssh-apex='TERM=vt100 ssh -t 46692'
 #alias ssh-46692='ssh -t apex'
 alias time='hyperfine'
+alias top='btm'
 alias untar='tar -zxvf'
 alias vi=nvim
-alias flac_to_mp3='source ~/Documents/dotfiles/flac_to_mp3.sh'
-alias mp3gain='source ~/Documents/dotfiles/mp3gain.sh'
 
 # git aliases
 alias g='git'

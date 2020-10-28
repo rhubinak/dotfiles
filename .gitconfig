@@ -2,9 +2,7 @@
 [user]
 	name = rhubinak
 	email = rhubinak@tuta.io
-# Please adapt and uncomment the following lines:
-#	name = Robert Hubinak
-#	email = rh@rh.lan
+	signingkey = 7D347D5DBDA6C115A8D63F8EDB26942AC9FE4437
 
 [core]
 	pager = delta
@@ -20,3 +18,7 @@
 	commit-decoration-style = bold yellow box ul
 	file-style = bold yellow ul
 	file-decoration-style = none
+[gpg]
+	program = gpg2
+[commit]
+	gpgsign = true

@@ -1,0 +1,282 @@
+#!/bin/bash
+
+set -euo pipefail
+shopt -s failglob
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo 'This script must be run with root privileges' >&2
+    exit 1
+fi
+
+# Enable RPM Fusion repository
+su -c 'dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm'
+
+dnf upgrade --refresh
+
+# Enable full disk encryption
+
+# Enable Gnome night light mode
+
+dnf install \
+    alacritty \
+    bat \
+    clang \
+    cmus \
+    dnf-automatic \
+    dnf-plugin-system-upgrade \
+    dnf-plugins-core \
+    evolution \
+    exa \
+    fd-find \
+    ffmpeg \
+    firefox-wayland \
+    flac \
+    git-delta \
+    gnome-tweak-tool \
+    golang \
+    grim \
+    hugo \
+    hyperfine \
+    java-1.8.0-openjdk \
+    jq \
+    jython \
+    keepassxc \
+    lame \
+    libX11-devel \
+    libxcb \
+    magic-wormhole \
+    make \
+    mako \
+    mp3gain \
+    mpv \
+    nano \
+    neovim \
+    openssl-devel \   
+    p7zip \
+    p7zip-plugins \
+    procs \
+    python3-mako \
+    python3-virtualenv \
+    qbittorrent \
+    qt5-qtwayland \
+    restic \
+    ripgrep \
+    sil-charis-fonts \
+    skim \
+    slurp \
+    starship \
+    sway \
+    texlive-collection-fontsrecommended \
+    texlive-collection-latexextra \
+    texlive-collection-mathscience \
+    texlive-collection-xetex \
+    tldr \
+    util-linux-user \
+    zathura-pdf-mupdf
+
+sudo dnf copr enable atim/bottom -y
+sudo dnf install bottom
+
+cargo install rmesg
+cargo install du-dust
+
+# Nushell
+cargo install nu --features=extra
+echo "/home/rh/.cargo/bin/nu" > /etc/shells
+chsh -s /home/rh/.cargo/bin/nu rh
+
+# Noto emoji fonts
+curl -fLo "/usr/share/fonts/nerd-noto/Noto Emoji Nerd Font Complete.otf" \
+    https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Noto/Emoji/complete/Noto%20Emoji%20Nerd%20Font%20Complete.ttf
+fc-cache -v
+
+# VS code
+rpm --import https://packages.microsoft.com/keys/microsoft.asc
+sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+dnf install code
+
+# Remove unneeded stuff
+dnf remove virtualbox-* rhythmbox iptables firewalld -x nftables
+systemctl stop bluetooth.service
+systemctl disable bluetooth.service
+
+## Kernel hardening
+
+# Restrict the kernel logs to root only
+echo 'kernel.dmesg_restrict=1' >> /etc/sysctl.d/99-sysctl.conf
+
+# Disable kexec
+echo 'kernel.kexec_load_disabled=1' >> /etc/sysctl.d/99-sysctl.conf
+
+# Hide the kernel symbols in /proc/kallsyms
+echo 'kernel.kptr_restrict=2' >> /etc/sysctl.d/99-sysctl.conf
+
+# Restrict the BPF JIT compiler to root only
+echo 'kernel.unprivileged_bpf_disabled=1' >> /etc/sysctl.d/99-sysctl.conf
+
+# Restrict the use of the ptrace() syscall to root only
+echo 'kernel.yama.ptrace_scope=2' >> /etc/sysctl.d/99-sysctl.conf
+
+# Harden the JIT compiler against certain attacks such as heap spraying attacks
+echo 'net.core.bpf_jit_harden=2' >> /etc/sysctl.d/99-sysctl.conf
+
+# Enable source validation to prevent certain IP spoofing methods
+echo 'net.ipv4.conf.all.rp_filter=1' >> /etc/sysctl.d/99-sysctl.conf
+echo 'net.ipv4.conf.default.rp_filter=1' >> /etc/sysctl.d/99-sysctl.conf
+
+# Disable ICMP redirect acceptance
+#echo 'net.ipv4.conf.all.accept_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
+echo 'net.ipv4.conf.default.accept_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
+echo 'net.ipv4.conf.all.secure_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
+echo 'net.ipv4.conf.default.secure_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
+echo 'net.ipv6.conf.all.accept_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
+echo 'net.ipv6.conf.default.accept_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
+
+# Disable ICMP redirect sending
+echo 'net.ipv4.conf.all.send_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
+echo 'net.ipv4.conf.default.send_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
+
+# ignore ICMP requests
+echo 'net.ipv4.icmp_echo_ignore_all=1' >> /etc/sysctl.d/99-sysctl.conf
+echo 'net.ipv6.icmp.echo_ignore_all=1' >> /etc/sysctl.d/99-sysctl.conf
+
+# Improve ASLR effectiveness for mmap
+echo 'vm.mmap_rnd_bits=32' >> /etc/sysctl.d/99-sysctl.conf
+echo 'vm.mmap_rnd_compat_bits=16' >> /etc/sysctl.d/99-sysctl.conf
+
+# Disable TCP timestamps
+echo 'net.ipv4.tcp_timestamps=0' >> /etc/sysctl.d/99-sysctl.conf
+
+# Disable SACK
+echo 'net.ipv4.tcp_sack=0' >> /etc/sysctl.d/99-sysctl.conf
+
+# Disable the SysRq key
+echo 'kernel.sysrq=0' >> /etc/sysctl.d/99-sysctl.conf
+
+# Enable TCP Fast Open
+echo 'net.ipv4.tcp_fastopen=3' >> /etc/sysctl.d/99-sysctl.conf
+
+# Prevent time-wait assassination attacks
+echo 'net.ipv4.tcp_rfc1337=1' >> /etc/sysctl.d/99-sysctl.conf
+
+# Enable TCP syncookies to prevent SYN flood attacks
+#echo 'net.ipv4.tcp_syncookies=1' >> /etc/sysctl.d/99-sysctl.conf
+
+# Adjust swapiness
+echo 'vm.swappiness=10' >> /etc/sysctl.d/99-sysctl.conf
+
+# Disable NMI watchdog
+echo 'kernel.nmi_watchdog=0' >> /etc/sysctl.d/99-sysctl.conf
+echo 'blacklist iTCO_wdt' >> /etc/modprobe.d/watchdog.conf
+echo 'blacklist iTCO_vendor_support' >> /etc/modprobe.d/watchdog.conf
+
+# Force DNSSEC, DNS over TLS and Cloudflare DNS servers. Will override router settings.
+echo 'DNS=1.1.1.1 8.8.8.8' >> /etc/systemd/resolved.conf
+echo 'DNSSEC=yes' >> /etc/systemd/resolved.conf
+#echo 'DNSOverTLS' >> /etc/systemd/resolved.conf
+
+## Disable kernel modules
+
+# Disable Bluetooth
+echo 'install bluetooth /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install btusb /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+
+# Disable Firewire
+echo 'install firewire-core /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+
+# Disable Thunderbolt
+echo 'install thunderbolt /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+
+# Disable Intel ME
+echo 'install mei /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install mei-me /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+
+# Disable PC Speaker to disable beeps for discretion purposes.
+echo 'install pcspkr /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+
+# Disable conntrack helper.
+echo 'options nf_conntrack nf_conntrack_helper=0' >> /etc/modprobe.d/custom-blocklist.conf
+
+# Disable uncommon filesystems.
+echo 'install cramfs /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install freevxfs /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install jffs2 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install hfs /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install hfsplus /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install udf /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+
+# Disable uncommon network protocols.
+echo 'install dccp /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install sctp /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install rds /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install tipc /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install n-hdlc /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install ax25 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install netrom /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install x25 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install rose /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install decnet /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install econet /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install af_802154 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install ipx /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install appletalk /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install psnap /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install p8023 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install llc /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+echo 'install p8022 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
+
+# Set a more restrictive umask.
+# This makes newly created files only readable by the owner.
+echo "umask 0077" >> /etc/profile.d/umask.sh
+
+# Configure firewall
+# Rules are stored in /etc/sysconfig/nftables.conf
+systemctl enable nftables.service
+systemctl start nftables.service
+
+# Hugo
+go get github.com/tdewolff/minify/cmd/minify
+npm i -g purgecss
+
+# Sway
+pip3 install --user psutil bumblebee-status
+
+# Enable fractional scaling
+gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
+
+# Brave browser
+#sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
+#sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+#sudo dnf install brave-browser brave-keyring
+
+# Neovim
+curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+rustup component add rls rust-analysis rust-src
+go get -u github.com/sourcegraph/go-langserver
+#Restart neovim and run :PlugInstall to install
+
+# configure MPV autosub
+pip3 install subliminal
+git clone https://github.com/rhubinak/autosub-mpv.git
+mkdir -p ~/.config/mpv/scripts
+ln -s ~/autosub-mpv/autosub.lua ~/.config/mpv/scripts
+
+# Subsync
+pip3 install git+https://github.com/smacke/subsync
+# subsync video.mp4 -i unsynchronized.srt -o synchronized.srt
+
+# Java decompiler
+curl `curl -s https://api.github.com/repos/java-decompiler/jd-gui/releases/latest | jq -r .assets[0].browser_download_url` -soL > jd-gui.jar
+
+# Standard Notes
+
+# Fix Standard Notes on Gnome launcher issue
+#ln -sf ~/.local/share/applications/appimagekit-standard-notes.desktop /usr/share/applications/appimagekit-standard-notes.desktop
+
+# rust
+curl https://sh.rustup.rs -sSf | sh
+#rustup component add clippy
+
+# Skype
+#curl https://go.skype.com/skypeforlinux-64.rpm | dnf install

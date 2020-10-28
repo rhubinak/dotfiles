@@ -1,0 +1,204 @@
+#!/bin/bash
+
+set -euo pipefail
+shopt -s failglob
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo 'This script must be run with root privileges' >&2
+    exit 1
+fi
+
+USER=rh
+
+# Append line to a file
+# If file does not exist, do nothing
+# If file exists and the line is already there, do nothing
+append_line () {
+  if ! grep -qF $1 $2; then
+    echo $1 >> $2
+  fi
+}
+
+# enable alpine rolling repo
+echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositories
+
+# enable alpine community repo
+echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+
+# enable alpine testing repo
+#echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
+#setup-apkcache
+apk update
+apk upgrade
+apk add \
+    acpi \
+    aerc \
+    alacritty \
+    autoconf \
+    automake \
+    bat \
+    build-base \
+    calcurse \
+    clang \
+    cmus \
+    connman \
+    curl \
+    dmenu \
+    eudev \
+    evolution \
+    ffmpeg \
+    firefox \
+    flac \
+    flatpak \
+    fzf \
+    fzf-neovim \
+    g++ \
+    gcc \
+    geoclue \
+    git \
+    gnome-keyring \
+    go \
+    imagemagick \
+    imv \
+    iwd \
+    keepassxc \
+    lame \
+    less \
+    libreoffice \
+    light \
+    make \
+    mako \
+    man-pages \
+    mandoc \
+    mc \
+    mpg123-dev \
+    mpv \
+    nano \
+    neovim \
+    nftables \
+    openjdk \
+    openssh-client \
+    p7zip \
+    parallel \
+    py3-pip \
+    py3-psutil \
+    python3 \
+    qt5-qtwayland \
+    remmina \
+    restic \
+    ripgrep \
+    rtorrent \
+    rustup \
+    shadow \
+    simple-mtpfs \
+    sudo \
+    sway \
+    sway-doc \
+    texlive-luatex \
+    texlive-xetex \
+    texmf-dist-most \
+    wayland-dev \
+    xorg-server-xwayland \
+    youtube-dl \
+    zathura \
+    zathura-pdf-mupdf
+
+rc-update add chrony
+rc-update add dhcpcd
+rc-update add iwd
+
+/etc/init.d/chrony start
+/etc/init.d/iwd start
+/etc/init.d/dhcpcd start
+
+# Allow unicode
+append_line "unicode=\"YES\"" '/etc/rc.conf'
+
+# Configure firewall
+#modprobe nf_tables_inet
+#append_line 'nf_tables_inet' '/etc/modules'
+#ln -sf .nftables.nft ~/.nftables.nft
+#nft -f ~/.nftables.nft
+rc-update add nftables
+
+# Configure automatic updates
+echo "#!/bin/sh" >> /etc/periodic/hourly/autoupdate
+echo "apk update" >> /etc/periodic/hourly/autoupdate
+echo "apk upgrade" >> /etc/periodic/hourly/autoupdate
+chmod a+x /etc/periodic/hourly/autoupdate
+
+# Configure user.js file
+#git clone https://github.com/rhubinak/user.js.git
+#~/.mozilla/firefox/XXXXXXXX.your_profile_name/user.js
+#ln -sf ~/user.js/user.js ~/.mozilla/firefox/*.default/user.js
+
+
+# /etc/profile.d/xdg_runtime_dir.sh
+# if test -z "${XDG_RUNTIME_DIR}"; then
+#   export XDG_RUNTIME_DIR=/tmp/$(id -u)-runtime-dir
+#   mkdir -p "${XDG_RUNTIME_DIR}"
+#   chmod 0700 "${XDG_RUNTIME_DIR}"
+# fi
+
+adduser $USER
+append_line "%sudo   ALL=(ALL) ALL" '/etc/sudoers'
+addgroup sudo
+adduser $USER sudo
+#npm i -g typescript
+setup-udev
+# Install graphics drivers appropriate for your hardware
+# Add yourself to the input and video groups
+adduser $USER input
+adduser $USER video
+adduser root input
+adduser root video
+
+# Sound Setup
+apk add alsa-utils alsa-utils-doc alsa-lib alsaconf
+adduser $USER audio
+adduser root audio
+alsamixer
+nano /usr/share/alsa/alsa.conf
+rc-service alsa start
+rc-update add alsa
+
+# Reboot
+#sudo restart
+
+# Sway
+mkdir ~/.xdg
+chmod 7700 ~/.xdg
+sway -V
+
+# will install bumblebee-status into ~/.local/bin/bumblebee-status
+pip install --user bumblebee-status
+
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub com.skype.Client
+flatpak install flathub com.valvesoftware.Steam
+#flatpak run com.skype.Client
+
+# Set in firefox about:config to enable sound
+security.sandbox.content.level 0
+
+# Gammastep - use wayland compatible version
+#git clone https://gitlab.com/chinstrap/gammastep.git
+git clone -b issue-6 https://gitlab.com/chinstrap/gammastep.git
+./bootstrap
+./configure
+make
+sudo make install
+
+# Calcurse
+pip3 install --user httplib2
+
+# Mount USB device
+# simple-mtpfs ~/mnt
+
+# Unmount USB device
+# fusermount -u ~/mnt
+
+# Get IP addresses after disconnect
+# udhcpc -i wlan0
+# udhcpc6 -i wlan0

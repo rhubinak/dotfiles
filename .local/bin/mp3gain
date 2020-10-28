@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -euo pipefail
+shopt -s failglob
+
+# Remove tag info stored previously
+find . -name '*.mp3' -type f | parallel 'mp3gain -s d'
+
+# Analyze tracks and apply gain
+find . -name '*.mp3' -type f | parallel 'mp3gain -e -r -c -s s -f -p -T -m 7'

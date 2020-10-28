@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -euo pipefail
+shopt -s failglob
+
+# SQL Plus
+#sqlplus sys/Pa$$w0rd@//localhost:1521/XE as sysdba
+
+#ALTER SESSION SET CONTAINER=XEPDB1;
+
+# Create tablespaces. In case of error try running 'unset NLS_LANG'
+echo "CREATE TABLESPACE TS3TABLES DATAFILE '/opt/oracle/oradata/XE/TS3TABLES.dbf' SIZE 6G EXTENT MANAGEMENT LOCAL AUTOALLOCATE;" | sqlplus -S system/Pa$$w0rd@xe
+echo "CREATE TABLESPACE TS3INDEX DATAFILE '/opt/oracle/oradata/XE/TS3INDEX.dbf' SIZE 3G EXTENT MANAGEMENT LOCAL AUTOALLOCATE;" | sqlplus -S system/Pa$$w0rd@xe
+
+# Create users
+echo 'CREATE USER VM_51HF_FULL IDENTIFIED BY Pa$$w0rd DEFAULT TABLESPACE TS3TABLES TEMPORARY TABLESPACE TEMP;' | sqlplus -S system/Pa$$w0rd@xe
+echo 'ALTER USER VM_51HF_FULL QUOTA UNLIMITED ON TS3INDEX;' | sqlplus -S system/Pa$$w0rd@xe
+echo 'GRANT CONNECT, DBA TO VM_51HF_FULL;' | sqlplus -S system/Pa$$w0rd@xe
+echo 'CREATE USER VM_51HF_FULL_ORIG IDENTIFIED BY Pa$$w0rd DEFAULT TABLESPACE TS3TABLES TEMPORARY TABLESPACE TEMP;' | sqlplus -S system/Pa$$w0rd@xe
+echo 'ALTER USER VM_51HF_FULL_ORIG QUOTA UNLIMITED ON TS3INDEX;' | sqlplus -S system/Pa$$w0rd@xe
+echo 'GRANT CONNECT, DBA TO VM_51HF_FULL_ORIG;' | sqlplus -S system/Pa$$w0rd@xe
+
+# Import DB dumps
+imp system/Pa$$w0rd@xe FILE='VM_MAIN_DEV_FULL.dmp' FROMUSER=VM_MAIN_DEV_FULL TOUSER=VM_51HF_FULL GRANTS=Y
+imp system/Pa$$w0rd@xe FILE='VM_MAIN_DEV_FULL.dmp' FROMUSER=VM_MAIN_DEV_FULL TOUSER=VM_51HF_FULL_ORIG GRANTS=Y

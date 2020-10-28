@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -euo pipefail
+shopt -s failglob
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo 'This script must be run with root privileges' >&2
+    exit 1
+fi
+
+# Oracle DB
+dnf groupinstall -y "Development Tools"
+dnf groupinstall -y "Administration Tools"
+dnf groupinstall -y "System Tools"
+dnf install -y libaio-devel sysstat smartmontools ksh compat-libstdc++-33 libnsl
+# Missing compat-libcap1
+curl http://mirror.centos.org/centos/7/os/x86_64/Packages/compat-libcap1-1.10-7.el7.x86_64.rpm
+dnf install -y compat-libcap1-1.10-7.el7.x86_64.rpm
+dnf install -y oracle-database-preinstall-18c-1.0-1.el7.x86_64
+rpm -i --nodigest oracle-database-xe-18c-1.0-1.x86_64.rpm
+
+echo 'export ORACLE_HOME="/opt/oracle/product/18c/dbhomeXE"' >> ~/.bashrc
+echo 'export ORACLE_SID="XE"' >> ~/.bashrc
+echo 'export PATH="$PATH:$ORACLE_HOME/bin"' >> ~/.bashrc
+. ~/.bashrc
+
+./$ORACLE_HOME/root.sh
+
+/etc/init.d/oracle-xe-18c configure
+/etc/init.d/oracle-xe-18c start
+
+chkconfig --add oracle-xe-18c
+chkconfig oracle-xe-18c on
+systemctl enable oracle-xe-18c
+systemctl start oracle-xe-18c
+
+# SQL developer
+rpm -Uhv jdk*.rpm
+rpm -Uhv sqldeveloper*.rpm
