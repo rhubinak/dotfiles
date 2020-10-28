@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -euo pipefail
+shopt -s failglob
+
+# Initialize the repo, comment out or remove after first run or you will re-initialize it and lose your backup
+#restic init
+#restic -r b2:bucketname:path/to/repo init
+
+# Backup files
+restic backup /home/rh/.env /home/rh/.ssh /home/rh/.gnupg /home/rh/.valuemation /home/rh/Music /home/rh/Documents
+
+# Unlock repo in case of issues
+#restic unlock
+
+# Remove old backups
+#restic forget --keep-last 1 --prune

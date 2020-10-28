@@ -8,6 +8,8 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+USER=rh
+
 # Enable RPM Fusion repository
 su -c 'dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm'
@@ -83,8 +85,8 @@ cargo install du-dust
 
 # Nushell
 cargo install nu --features=extra
-echo "/home/rh/.cargo/bin/nu" > /etc/shells
-chsh -s /home/rh/.cargo/bin/nu rh
+echo "/home/$USER/.cargo/bin/nu" > /etc/shells
+chsh -s /home/$USER/.cargo/bin/nu $USER
 
 # Noto emoji fonts
 curl -fLo "/usr/share/fonts/nerd-noto/Noto Emoji Nerd Font Complete.otf" \
