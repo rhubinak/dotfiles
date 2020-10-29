@@ -41,7 +41,7 @@ alias cat='bat -pp --theme="Nord"'
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
 alias df='df -H'
-alias dmesg='rmesg'
+alias dmesg='sudo /home/rh/.cargo/bin/rmesg'
 alias du='dust'
 alias find='fd'
 alias firewall='sudo nft list ruleset'
