@@ -30,6 +30,21 @@ set $menu dmenu_path | dmenu | xargs swaymsg exec --
 #bindsym XF86MonBrightnessDown exec light -U 5
 #bindsym XF86MonBrightnessUp exec light -A 5
 
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') +5% # Raise
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') -5% # Lower
+bindsym XF86AudioMute exec pactl set-sink-mute  $(pacmd list-sinks |awk '/* index:/{print $3}') toggle # Mute
+bindsym XF86AudioPause exec cmus-remote --pause
+
+#bindsym --locked XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') +5%
+#bindsym --locked XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') -5%
+#bindsym --locked XF86AudioMute exec --no-startup-id pactl set-sink-mute $(pacmd list-sinks |awk '/* index:/{print $3}') toggle
+
+# Screen brightness controls -- # https://github.com/haikarainen/light
+bindsym XF86MonBrightnessUp exec light -A 5    # increase screen brightness
+bindsym XF86MonBrightnessDown exec light -U 5  # decrease screen brightness
+#bindsym --locked XF86MonBrightnessUp exec --no-startup-id light -A 10
+#bindsym --locked XF86MonBrightnessDown exec --no-startup-id light -U 10
+
 ##
 ## Screenshots via grim and slurp
 ##
@@ -38,12 +53,25 @@ bindsym $mod+Print exec grim -o $(swaymsg -t get_outputs | jq -r '.[] | select(.
 bindsym $mod+Shift+Print exec grim -g "$(slurp)" $(xdg-user-dir PICTURES)/$(date +'%Y-%m-%d-%H%M%S_grim.png')
 
 ##
+## TODO: set up ydotool as a text expander
+##
+
+# Enable numlock
+input * xkb_numlock enable
+
+##
 ## Screen lock
 ##
-set $BIN_DIR ~/.local/bin
-set $lock $BIN_DIR/lock.sh
+exec swayidle -w \
+    timeout 300 'swaylock -f -e -c 000000' \
+    timeout 600 'swaymsg "output * dpms off"' \
+    resume 'swaymsg "output * dpms on"' \
+    before-sleep 'swaylock -f -e -c 000000'
 
-bindsym $mod+l exec $lock
+#set $BIN_DIR ~/.local/bin
+#set $lock $BIN_DIR/lock.sh
+#bindsym $mod+l exec $lock
+bindsym $mod+l exec swaylock -e -c 000000 
 
 ### Output configuration
 #
@@ -54,11 +82,14 @@ output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 #
 
 #output eDP-1 scale 1.5
-output eDP-1 position 0,0
+output HDMI-A-1 position 0,0
+output DP-1 transform 90 position 2560,0
+#output eDP-1 position 2560,0
+#output eDP-1 position 2560,0
 #output HDMI-A-2 scale 1.25
 # If scaling is active, it has to be considered when defining relative positions. 
 # For example, if the scaling factor for the left monitor (eDP-1) is 1.5, the relative position for the right output has to be divided by 1.5. 
-output HDMI-A-2 position 1920,0
+#output HDMI-A-2 position 1920,0
 #output HDMI-A-2 position 1280,0
 
 #
@@ -73,7 +104,8 @@ output HDMI-A-2 position 1920,0
 #          timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
 #          before-sleep '$lock'
 
-exec swayidle -w before-sleep '$lock'
+#exec swayidle -w before-sleep '$lock'
+#exec swayidle -w before-sleep swaylock
 
 #
 # This will lock your screen after 300 seconds of inactivity, then turn off
@@ -82,7 +114,7 @@ exec swayidle -w before-sleep '$lock'
 
 ### Input configuration
 
-input "1267:33:Elan_Touchpad" {
+input "2:14:ETPS/2_Elantech_Touchpad" {
   tap enabled
   natural_scroll enabled
   middle_emulation enable
@@ -103,9 +135,11 @@ input "type:keyboard" {
 #
     # Start a terminal
     bindsym $mod+Return exec $term
+    bindsym $mod+x exec $term
 
     # Kill focused window
     bindsym $mod+Shift+q kill
+    bindsym $mod+q kill
 
     # Start your launcher
     bindsym $mod+d exec $menu
@@ -269,11 +303,12 @@ bar {
 exec GDK_BACKEND=wayland
 exec CLUTTER_BACKEND=wayland
 exec mako --anchor top-right
-exec keepassxc
-exec firefox
-#exec flatpak run com.skype.Client
-exec skype
+exec evolution
+exec keepassxc --platform wayland
+exec firefox-wayland
 #exec gammastep
-exec keybase
+exec run_keybase
+exec ~/standard-notes-3.5.16-linux-x86_64.AppImage
+exec flatpak run org.signal.Signal
 
 include /etc/sway/config.d/*

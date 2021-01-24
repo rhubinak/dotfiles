@@ -90,6 +90,7 @@ apk add \
     ripgrep \
     rtorrent \
     rustup \
+    sd \
     shadow \
     simple-mtpfs \
     sudo \
@@ -175,9 +176,7 @@ sway -V
 pip install --user bumblebee-status
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install flathub com.skype.Client
 flatpak install flathub com.valvesoftware.Steam
-#flatpak run com.skype.Client
 
 # Set in firefox about:config to enable sound
 security.sandbox.content.level 0

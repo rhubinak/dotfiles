@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/sh
 
 set -euo pipefail
 shopt -s failglob
@@ -32,12 +32,14 @@ dnf install \
     exa \
     fd-find \
     ffmpeg \
+    fira-code-fonts \
     firefox-wayland \
     flac \
     git-delta \
     gnome-tweak-tool \
     golang \
     grim \
+    htop \
     hugo \
     hyperfine \
     java-1.8.0-openjdk \
@@ -47,16 +49,17 @@ dnf install \
     lame \
     libX11-devel \
     libxcb \
-    magic-wormhole \
+    light \
     make \
     mako \
     mp3gain \
     mpv \
     nano \
     neovim \
-    openssl-devel \   
+    openssl-devel \
     p7zip \
     p7zip-plugins \
+    powerline-fonts \
     procs \
     python3-mako \
     python3-virtualenv \
@@ -64,34 +67,51 @@ dnf install \
     qt5-qtwayland \
     restic \
     ripgrep \
+    sd \
     sil-charis-fonts \
     skim \
     slurp \
-    starship \
+#    starship \
     sway \
+    swayidle \
+    swaylock \
     texlive-collection-fontsrecommended \
     texlive-collection-latexextra \
     texlive-collection-mathscience \
     texlive-collection-xetex \
+    thefuck \
     tldr \
     util-linux-user \
-    zathura-pdf-mupdf
+    waybar \
+    wl-clipboard \
+    ydotool \
+    zathura-pdf-mupdf \
+    zsh
 
 sudo dnf copr enable atim/bottom -y
 sudo dnf install bottom
 
-cargo install rmesg
+#cargo install rmesg
 cargo install du-dust
 
 # Nushell
-cargo install nu --features=extra
-echo "/home/$USER/.cargo/bin/nu" > /etc/shells
-chsh -s /home/$USER/.cargo/bin/nu $USER
+#cargo install nu --features=extra
+#echo "/home/$USER/.cargo/bin/nu" > /etc/shells
+#chsh -s /home/$USER/.cargo/bin/nu $USER
 
-# Noto emoji fonts
-curl -fLo "/usr/share/fonts/nerd-noto/Noto Emoji Nerd Font Complete.otf" \
-    https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Noto/Emoji/complete/Noto%20Emoji%20Nerd%20Font%20Complete.ttf
+# Ox
+#cargo install --git https://github.com/curlpipe/ox
+
+# Ohmyzsh
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# Fira code nerd fonts
+curl -fLo "/usr/share/fonts/nerd-fira/Fira Code Regular Nerd Font Complete.otf" \
+    https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/complete/Fira%20Code%20Regular%20Nerd%20Font%20Complete.ttf
 fc-cache -v
+
+# Set ZSH_THEME="powerlevel10k/powerlevel10k" in ~/.zshrc
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
 # VS code
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
@@ -99,7 +119,7 @@ sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.micros
 dnf install code
 
 # Remove unneeded stuff
-dnf remove virtualbox-* rhythmbox iptables firewalld -x nftables
+dnf remove virtualbox-* rhythmbox
 systemctl stop bluetooth.service
 systemctl disable bluetooth.service
 
@@ -234,15 +254,15 @@ echo "umask 0077" >> /etc/profile.d/umask.sh
 
 # Configure firewall
 # Rules are stored in /etc/sysconfig/nftables.conf
-systemctl enable nftables.service
-systemctl start nftables.service
+#systemctl enable nftables.service
+#systemctl start nftables.service
 
 # Hugo
 go get github.com/tdewolff/minify/cmd/minify
 npm i -g purgecss
 
 # Sway
-pip3 install --user psutil bumblebee-status
+#pip3 install --user psutil bumblebee-status
 
 # Enable fractional scaling
 gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
@@ -276,9 +296,15 @@ curl `curl -s https://api.github.com/repos/java-decompiler/jd-gui/releases/lates
 # Fix Standard Notes on Gnome launcher issue
 #ln -sf ~/.local/share/applications/appimagekit-standard-notes.desktop /usr/share/applications/appimagekit-standard-notes.desktop
 
-# rust
+# Rust
 curl https://sh.rustup.rs -sSf | sh
 #rustup component add clippy
 
-# Skype
-#curl https://go.skype.com/skypeforlinux-64.rpm | dnf install
+# Signal
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub org.signal.Signal
+
+# Terminalizer
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+nvm install node
+npm install -g terminalizer

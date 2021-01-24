@@ -18,7 +18,15 @@
 	commit-decoration-style = bold yellow box ul
 	file-style = bold yellow ul
 	file-decoration-style = none
+
 [gpg]
 	program = gpg2
+
 [commit]
 	gpgsign = true
+
+[pull]
+	rebase = false
+
+[push]
+	default = simple
