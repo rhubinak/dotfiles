@@ -30,3 +30,7 @@
 
 [push]
 	default = simple
+
+# Include company creds for repos inside company dir
+[includeIf "gitdir:~/psh/**"]
+	path = ~/psh/.gitconfig

@@ -84,6 +84,14 @@ output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 #output eDP-1 scale 1.5
 output HDMI-A-1 position 0,0
 output DP-1 transform 90 position 2560,0
+focus output HDMI-A-1
+
+# Clamshell mode
+bindswitch --reload --locked lid:on output DP-1 disable
+bindswitch --reload --locked lid:off output DP-1 enable
+
+exec_always ~/.local/bin/stop-display-reset.sh
+
 #output eDP-1 position 2560,0
 #output eDP-1 position 2560,0
 #output HDMI-A-2 scale 1.25
@@ -306,9 +314,10 @@ exec mako --anchor top-right
 exec evolution
 exec keepassxc --platform wayland
 exec firefox-wayland
-#exec gammastep
+exec wlsunset -l 49.2 -L 16.6
 exec run_keybase
-exec ~/standard-notes-3.5.16-linux-x86_64.AppImage
+exec ~/standard-notes-3.6.0-linux-x86_64.AppImage
 exec flatpak run org.signal.Signal
+exec flatpak run im.riot.Riot
 
 include /etc/sway/config.d/*

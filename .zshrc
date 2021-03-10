@@ -75,7 +75,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git web-search)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -129,7 +129,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 test -r $HOME/.env && . $HOME/.env
 
 # Load platform.sh aliases
-test -r $HOME/cse-aliases/cse-aliases.env && . $HOME/cse-aliases/cse-aliases.env
+test -r $HOME/psh/cse-aliases/cse-aliases.env && . $HOME/psh/cse-aliases/cse-aliases.env
 
 #export CLUTTER_BACKEND=wayland
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
@@ -145,7 +145,6 @@ export SOLARIZED_THEME="light"
 
 alias bc='bc -l'
 alias cat='bat -pp --theme="Nord"'
-#alias cd='z'
 
 # https://www.atlassian.com/git/tutorials/dotfiles
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
@@ -167,33 +166,32 @@ alias time='hyperfine'
 alias top='btm'
 alias untar='tar -zxvf'
 alias vi=nvim
+alias ytdl='youtube-dl -x --audio-format "mp3" --audio-quality 0'
 
-# git aliases
-alias g='git'
-alias gco='git checkout'
-alias gcom='git checkout master'
-alias gcb='git checkout -b'
+# git aliases (others provided by the git plugin)
+#alias g='git'
+#alias gco='git checkout'
+#alias gcom='git checkout master'
+#alias gcb='git checkout -b'
 #alias gr='git rm -rf'
 alias gs='git status'
-alias ga='git add .'
+#alias ga='git add .'
 alias gc='git commit -m'
-alias gp='git push'
-alias gl='git pull'
+#alias gp='git push'
+#alias gl='git pull'
 
 # Update all repos in current dir
 alias git-pull-all="fd -H -g --max-depth 2 --type d .git | sed 's/.git//' | xargs -I {} git -C {} pull"
-
-## get rid of command not found ##
-alias cd..='cd ..'
-
-## a quick way to get out of current directory ##
-alias ..='cd ..'
 
 # handy short cuts #
 alias h='history'
 alias j='jobs -l'
 
+# Resize images to 25% of the original resolution
 alias resize25='convert -resize 25%'
+
+# Record video from webcam, encode to x265 via GPU, drop duplicate frames and keep only last 5 mins
+alias record="ffmpeg -vaapi_device /dev/dri/renderD128 -f v4l2 -framerate 30 -video_size 1920x1080 -c:v mjpeg -i /dev/video4 -vf mpdecimate,setpts=N/FRAME_RATE/TB,format=nv12,hwupload -c:v hevc_vaapi -f segment -segment_time 300 -segment_wrap 2 webcam%01d.mkv"
 
 # if user is not root, pass all commands via sudo #
 if [ $UID -ne 0 ]; then

@@ -18,8 +18,6 @@ dnf upgrade --refresh
 
 # Enable full disk encryption
 
-# Enable Gnome night light mode
-
 dnf install \
     alacritty \
     bat \
@@ -30,11 +28,13 @@ dnf install \
     dnf-plugins-core \
     evolution \
     exa \
+    exfalso \
     fd-find \
     ffmpeg \
     fira-code-fonts \
     firefox-wayland \
     flac \
+    flameshot \
     git-delta \
     gnome-tweak-tool \
     golang \
@@ -42,6 +42,8 @@ dnf install \
     htop \
     hugo \
     hyperfine \
+    i3status-rs \
+    iwd \
     java-1.8.0-openjdk \
     jq \
     jython \
@@ -61,8 +63,6 @@ dnf install \
     p7zip-plugins \
     powerline-fonts \
     procs \
-    python3-mako \
-    python3-virtualenv \
     qbittorrent \
     qt5-qtwayland \
     restic \
@@ -82,8 +82,9 @@ dnf install \
     thefuck \
     tldr \
     util-linux-user \
-    waybar \
+#    waybar \
     wl-clipboard \
+    wlsunset \
     ydotool \
     zathura-pdf-mupdf \
     zsh
@@ -105,6 +106,9 @@ cargo install du-dust
 # Ohmyzsh
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
+# zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
 # Fira code nerd fonts
 curl -fLo "/usr/share/fonts/nerd-fira/Fira Code Regular Nerd Font Complete.otf" \
     https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/complete/Fira%20Code%20Regular%20Nerd%20Font%20Complete.ttf
@@ -119,9 +123,16 @@ sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.micros
 dnf install code
 
 # Remove unneeded stuff
-dnf remove virtualbox-* rhythmbox
+dnf remove virtualbox-* rhythmbox wpa_supplicant
 systemctl stop bluetooth.service
 systemctl disable bluetooth.service
+
+# iwd
+echo '[device]' >> /etc/NetworkManager/NetworkManager.conf
+echo 'wifi.backend=iwd' >> /etc/NetworkManager/NetworkManager.conf
+echo '[Network]' >> /etc/iwd/main.conf
+echo 'EnableIPv6=true' >> /etc/iwd/main.conf
+systemctl restart NetworkManager
 
 ## Kernel hardening
 
@@ -258,19 +269,18 @@ echo "umask 0077" >> /etc/profile.d/umask.sh
 #systemctl start nftables.service
 
 # Hugo
-go get github.com/tdewolff/minify/cmd/minify
-npm i -g purgecss
+#go get github.com/tdewolff/minify/cmd/minify
 
 # Sway
 #pip3 install --user psutil bumblebee-status
 
 # Enable fractional scaling
-gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
+#gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
 
 # Brave browser
-#sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
-#sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-#sudo dnf install brave-browser brave-keyring
+sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
+sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+sudo dnf install brave-browser brave-keyring
 
 # Neovim
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -307,4 +317,15 @@ flatpak install flathub org.signal.Signal
 # Terminalizer
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 nvm install node
-npm install -g terminalizer
+npm i -g terminalizer
+
+# PurgeCSS
+npm i -g purgecss
+
+# Riot/Matrix/Vector/Element...whatever, just agree on a fucking name
+flatpak install flathub im.riot.Riot
+
+# AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
