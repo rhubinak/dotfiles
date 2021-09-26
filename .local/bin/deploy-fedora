@@ -18,10 +18,16 @@ dnf upgrade --refresh
 
 # Enable full disk encryption
 
+# Tweak dnf
+echo "fastestmirror=True" >> /etc/dnf/dnf.conf
+echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
+
 dnf install \
+    aerc \
     alacritty \
     bat \
     clang \
+    clipman \
     cmus \
     dnf-automatic \
     dnf-plugin-system-upgrade \
@@ -38,11 +44,9 @@ dnf install \
     git-delta \
     gnome-tweak-tool \
     golang \
-    grim \
     htop \
     hugo \
     hyperfine \
-    i3status-rs \
     iwd \
     java-1.8.0-openjdk \
     jq \
@@ -57,7 +61,10 @@ dnf install \
     mp3gain \
     mpv \
     nano \
+    ncdu \
     neovim \
+    NetworkManager-tui \
+    nnn \
     openssl-devel \
     p7zip \
     p7zip-plugins \
@@ -70,7 +77,6 @@ dnf install \
     sd \
     sil-charis-fonts \
     skim \
-    slurp \
 #    starship \
     sway \
     swayidle \
@@ -82,9 +88,10 @@ dnf install \
     thefuck \
     tldr \
     util-linux-user \
-#    waybar \
+    waybar \
     wl-clipboard \
     wlsunset \
+    wofi \
     ydotool \
     zathura-pdf-mupdf \
     zsh
@@ -92,8 +99,13 @@ dnf install \
 sudo dnf copr enable atim/bottom -y
 sudo dnf install bottom
 
+python3 -m pip install --upgrade yt-dlp
+
 #cargo install rmesg
 cargo install du-dust
+
+# Markdown viewer
+cargo install mdcat
 
 # Nushell
 #cargo install nu --features=extra
@@ -132,6 +144,8 @@ echo '[device]' >> /etc/NetworkManager/NetworkManager.conf
 echo 'wifi.backend=iwd' >> /etc/NetworkManager/NetworkManager.conf
 echo '[Network]' >> /etc/iwd/main.conf
 echo 'EnableIPv6=true' >> /etc/iwd/main.conf
+echo '[Settings]' >> /etc/iwd/main.conf
+echo 'AutoConnect=true' >> /etc/iwd/main.conf
 systemctl restart NetworkManager
 
 ## Kernel hardening
@@ -278,14 +292,22 @@ echo "umask 0077" >> /etc/profile.d/umask.sh
 #gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
 
 # Brave browser
-sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
-sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-sudo dnf install brave-browser brave-keyring
+#sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
+#sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+#sudo dnf install brave-browser brave-keyring
+
+# Workaround until the official repo plays nicely
+flatpak remote-add --if-not-exists flathub-beta https://flathub.org/beta-repo/flathub-beta.flatpakrepo
+flatpak install flathub-beta com.brave.Browser
 
 # Neovim
-curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-rustup component add rls rust-analysis rust-src
-go get -u github.com/sourcegraph/go-langserver
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+pip install python-lsp-server
+curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-x86_64-unknown-linux-gnu.gz | gunzip -c - > ~/.local/bin/rust-analyzer
+chmod +x ~/.local/bin/rust-analyzer
+go get github.com/lighttiger2505/sqls
+npm install -g bash-language-server dockerfile-language-server-nodejs vscode-langservers-extracted yaml-language-server
+cargo install --git https://github.com/latex-lsp/texlab.git --locked
 #Restart neovim and run :PlugInstall to install
 
 # configure MPV autosub
@@ -329,3 +351,15 @@ flatpak install flathub im.riot.Riot
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 sudo ./aws/install
+
+# Firefox: remove microphone indicator
+# Set toolkit.legacyUserProfileCustomizations.stylesheets to True in about:config
+cd ~/.mozilla/firefox/
+if [[ $(grep '\[Profile[^0]\]' profiles.ini) ]]
+then PROFPATH=$(grep -E '^\[Profile|^Path|^Default' profiles.ini | grep -1 '^Default=1' | grep '^Path' | cut -c6-)
+else PROFPATH=$(grep 'Path=' profiles.ini | sed 's/^Path=//')
+fi
+mkdir $PROFPATH/chrome
+echo "#webrtcIndicator {" >> $PROFPATH/chrome/userChrome.css
+echo "  display: none;" >> $PROFPATH/chrome/userChrome.css
+echo "}" >> $PROFPATH/chrome/userChrome.css

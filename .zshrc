@@ -144,29 +144,38 @@ export BAT_THEME="Solarized (light)"
 export SOLARIZED_THEME="light"
 
 alias bc='bc -l'
-alias cat='bat -pp --theme="Nord"'
+alias c='bat -pp --theme="Nord"'
 
 # https://www.atlassian.com/git/tutorials/dotfiles
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias df='df -H'
 alias du='dust'
 alias find='fd'
+
+# to search for files without match use --files-without-match
 alias grep='rg -i -n -uuu'
+
 #alias ls='exa -G  --color auto --icons -a -s type'
 alias ls='exa -l --color always --icons -a -s type'
+alias m='mdcat'
 alias mkdir='mkdir -pv'
-alias nano='nano -l'
+alias mpv='mpv --stop-screensaver --gpu-context=wayland'
+alias n='nano'
 alias pdf='zathura'
 #alias ping='ping -c 4 -i.2'
 #alias ports='netstat -tulanp'
 alias ps='procs'
+#alias socat='socat -d -d'
 #alias ssh-apex='TERM=vt100 ssh -t 46692'
+#alias ssh-apex='TERM=xterm-256color ssh -t 46692'
 #alias ssh-46692='ssh -t apex'
 alias time='hyperfine'
 alias top='btm'
 alias untar='tar -zxvf'
 alias vi=nvim
-alias ytdl='youtube-dl -x --audio-format "mp3" --audio-quality 0'
+alias v=nvim
+alias ytdl='yt-dlp -x --audio-format "mp3" --audio-quality 0 --add-header "Cookie:"'
+alias zrc='nvim ~/.zshrc && source ~/.zshrc'
 
 # git aliases (others provided by the git plugin)
 #alias g='git'
@@ -197,13 +206,15 @@ alias record="ffmpeg -vaapi_device /dev/dri/renderD128 -f v4l2 -framerate 30 -vi
 if [ $UID -ne 0 ]; then
     alias dmesg='sudo dmesg'
     alias firewall='sudo nft list ruleset'
-    alias reboot='sudo reboot'
+    alias reboot='reboot'
     alias update='sudo dnf update'
     alias get='sudo dnf install'
-    alias suspend='sudo systemctl suspend && swaylock -f -e -c 000000'
+    alias zzz='systemctl suspend && swaylock -f -e -c 000000'
 fi
 
-#eval "$(zoxide init bash)"
+eval "$(zoxide init zsh)"
+alias z='zoxide'
+
 #eval "$(starship init bash)"
 
 # BEGIN SNIPPET: SymfonyCloud (PHP) CLI configuration
@@ -224,3 +235,11 @@ export NVM_DIR="$HOME/.nvm"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# TODO: start only one ssh-agent and reuse the created one
+eval `ssh-agent -s` > /dev/null
+
+# BEGIN SNIPPET: OVHcloud Web PaaS CLI configuration
+HOME=${HOME:-'/home/rh'}
+export PATH="$HOME/"'.webpaas-cli/bin':"$PATH"
+if [ -f "$HOME/"'.webpaas-cli/shell-config.rc' ]; then . "$HOME/"'.webpaas-cli/shell-config.rc'; fi # END SNIPPET

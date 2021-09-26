@@ -20,7 +20,7 @@ set $term alacritty
 # Your preferred application launcher
 # Note: pass the final command to swaymsg so that the resulting window can be opened
 # on the original workspace that the command was run on.
-set $menu dmenu_path | dmenu | xargs swaymsg exec --
+set $menu swaymsg exec wofi 
 
 # Set volume using the media keys
 #bindsym XF86AudioRaiseVolume exec amixer set Master 5%+
@@ -30,14 +30,11 @@ set $menu dmenu_path | dmenu | xargs swaymsg exec --
 #bindsym XF86MonBrightnessDown exec light -U 5
 #bindsym XF86MonBrightnessUp exec light -A 5
 
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') +5% # Raise
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') -5% # Lower
-bindsym XF86AudioMute exec pactl set-sink-mute  $(pacmd list-sinks |awk '/* index:/{print $3}') toggle # Mute
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% # Raise
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% # Lower
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle # Mute
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 bindsym XF86AudioPause exec cmus-remote --pause
-
-#bindsym --locked XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') +5%
-#bindsym --locked XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') -5%
-#bindsym --locked XF86AudioMute exec --no-startup-id pactl set-sink-mute $(pacmd list-sinks |awk '/* index:/{print $3}') toggle
 
 # Screen brightness controls -- # https://github.com/haikarainen/light
 bindsym XF86MonBrightnessUp exec light -A 5    # increase screen brightness
@@ -46,11 +43,10 @@ bindsym XF86MonBrightnessDown exec light -U 5  # decrease screen brightness
 #bindsym --locked XF86MonBrightnessDown exec --no-startup-id light -U 10
 
 ##
-## Screenshots via grim and slurp
+## Screenshots via flameshot
 ##
-
-bindsym $mod+Print exec grim -o $(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name') $(xdg-user-dir PICTURES)/$(date +'%Y-%m-%d-%H%M%S_grim.png')
-bindsym $mod+Shift+Print exec grim -g "$(slurp)" $(xdg-user-dir PICTURES)/$(date +'%Y-%m-%d-%H%M%S_grim.png')
+bindsym Print exec flameshot gui -p ~/Downloads
+bindsym $mod+Print exec flameshot screen -r -p ~/Downloads
 
 ##
 ## TODO: set up ydotool as a text expander
@@ -60,11 +56,11 @@ bindsym $mod+Shift+Print exec grim -g "$(slurp)" $(xdg-user-dir PICTURES)/$(date
 input * xkb_numlock enable
 
 ##
-## Screen lock
+## Idle configuration + Screen lock
 ##
 exec swayidle -w \
-    timeout 300 'swaylock -f -e -c 000000' \
-    timeout 600 'swaymsg "output * dpms off"' \
+    timeout 600 'swaylock -f -e -c 000000' \
+    timeout 660 'swaymsg "output * dpms off"' \
     resume 'swaymsg "output * dpms on"' \
     before-sleep 'swaylock -f -e -c 000000'
 
@@ -81,44 +77,21 @@ output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 # Example configuration:
 #
 
+# If scaling is active, it has to be considered when defining relative positions. 
+# For example, if the scaling factor for the left monitor (eDP-1) is 1.5, the relative position for the right output has to be divided by 1.5
 #output eDP-1 scale 1.5
+#output eDP-1 position 0,0
 output HDMI-A-1 position 0,0
-output DP-1 transform 90 position 2560,0
-focus output HDMI-A-1
+output DP-2 transform 270 position 2560,0
+#focus output HDMI-A-1
 
 # Clamshell mode
-bindswitch --reload --locked lid:on output DP-1 disable
-bindswitch --reload --locked lid:off output DP-1 enable
-
+bindswitch --reload --locked lid:on output eDP-1 disable
+bindswitch --reload --locked lid:off output eDP-1 enable
 exec_always ~/.local/bin/stop-display-reset.sh
-
-#output eDP-1 position 2560,0
-#output eDP-1 position 2560,0
-#output HDMI-A-2 scale 1.25
-# If scaling is active, it has to be considered when defining relative positions. 
-# For example, if the scaling factor for the left monitor (eDP-1) is 1.5, the relative position for the right output has to be divided by 1.5. 
-#output HDMI-A-2 position 1920,0
-#output HDMI-A-2 position 1280,0
 
 #
 # You can get the names of your outputs by running: swaymsg -t get_outputs
-
-### Idle configuration
-#
-# Example configuration:
-#
-#exec swayidle -w \
-#          timeout 300 '$lock' \
-#          timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-#          before-sleep '$lock'
-
-#exec swayidle -w before-sleep '$lock'
-#exec swayidle -w before-sleep swaylock
-
-#
-# This will lock your screen after 300 seconds of inactivity, then turn off
-# your displays after another 300 seconds, and turn your screens back on when
-# resumed. It will also lock your screen before your computer goes to sleep.
 
 ### Input configuration
 
@@ -132,6 +105,7 @@ input "type:keyboard" {
   xkb_layout us,cz,sk
   xkb_variant ,qwerty,qwerty
   xkb_options grp:lalt_lshift_toggle
+  repeat_delay 200
 }
 
 # You can get the names of your inputs by running: swaymsg -t get_inputs
@@ -163,7 +137,10 @@ input "type:keyboard" {
     bindsym $mod+Shift+c reload
 
     # Exit sway (logs you out of your Wayland session)
-    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+    #bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+
+    # Exit Sway
+    bindsym $mod+Shift+e exec ~/.config/waybar/scripts/poweroff.sh
 #
 # Moving around:
 #
@@ -292,32 +269,48 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 
 #
-# Status Bar:
+# Waybar:
 #
-# Read `man 5 sway-bar` for more information about this section.
-bar {
-    position top
-    colors {
-        statusline #ffffff
-        background #000000
-        inactive_workspace #32323200 #32323200 #5c5c5c
-    }
-    status_command ~/.local/bin/bumblebee-status -m cpu memory battery date time -p time.format="%H:%M CW %V" date.format="%a, %b %d %Y" -t solarized
+mode "waybar" {
+    # Hide/show bars
+    bindsym space exec killall -SIGUSR1 waybar
+
+    # Reload configuration
+    bindsym r exec killall -SIGUSR2 waybar
+
+    # Back to normal: Enter or Escape or $mod+b
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+    bindsym $mod+b mode "default"
 }
+bindsym $mod+b mode "waybar"
+
+# Firefox about:config privacy.webrtc.legacyGlobalIndicator to false
+
+#xwayland disable
 
 #
 # Autostart:
 #
+exec_always 'pkill waybar; waybar'
 exec GDK_BACKEND=wayland
 exec CLUTTER_BACKEND=wayland
+exec wlsunset -l 49.2 -L 16.6
+#exec eval `ssh-agent -s`
+
+# Clipboard
+exec wl-paste -t text --watch clipman store
+
+workspace 2
 exec mako --anchor top-right
+exec firefox-wayland
+
+workspace 3
 exec evolution
 exec keepassxc --platform wayland
-exec firefox-wayland
-exec wlsunset -l 49.2 -L 16.6
-exec run_keybase
-exec ~/standard-notes-3.6.0-linux-x86_64.AppImage
-exec flatpak run org.signal.Signal
+#exec run_keybase
+exec ~/standard-notes-3.8.21-linux-x86_64.AppImage
 exec flatpak run im.riot.Riot
-
-include /etc/sway/config.d/*
+exec flatpak run org.signal.Signal
+#exec flatpak run org.telegram.desktop
+#include /etc/sway/config.d/*

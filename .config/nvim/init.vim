@@ -1,51 +1,34 @@
-" Specify a directory for plugins
-" - For Neovim: ~/.local/share/nvim/plugged
-" - Avoid using standard Vim directory names like 'plugin'
-call plug#begin('~/.local/share/nvim/plugged')
+set nocompatible            " disable compatibility to old-time vi
+set showmatch               " show matching brackets.
+set ignorecase              " case insensitive matching
+set mouse=v                 " middle-click paste with mouse
+set hlsearch                " highlight search results
+set tabstop=2               " number of columns occupied by a tab character
+set termguicolors
+set softtabstop=2           " set multiple spaces as tabstops so <BS> does the right thing
+set expandtab               " converts tabs to white space
+set shiftwidth=2            " width for autoindents
+set autoindent              " indent a new line the same amount as the line just typed
+set number                  " add line numbers
+set wildmode=longest,list   " get bash-like tab completions
+set cc=80                   " set an 80 column border for good coding style
+filetype plugin indent on   " allows auto-indenting depending on file type
+syntax on                   " syntax highlighting
+colorscheme NeoSolarized
 
-Plug 'autozimu/LanguageClient-neovim', {
-    \ 'branch': 'next',
-    \ 'do': 'bash install.sh',
-    \ }
+"call plug#begin()
+"Plug 'tpope/vim-sensible'
+"Plug 'neovim/nvim-lspconfig'
+"call plug#end()
 
-" Make sure you use single quotes
-
-" Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
-" Plug 'junegunn/vim-easy-align'
-
-" Any valid git URL is allowed
-" Plug 'https://github.com/junegunn/vim-github-dashboard.git'
-
-" Multiple Plug commands can be written in a single line using | separators
-" Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
-
-" On-demand loading
-" Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
-" Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
-
-" Using a non-master branch
-" Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
-
-" Using a tagged release; wildcard allowed (requires git 1.9.2 or above)
-" Plug 'fatih/vim-go', { 'tag': '*' }
-
-" Plugin options
-" Plug 'nsf/gocode', { 'tag': 'v.20150303', 'rtp': 'vim' }
-
-" Plugin outside ~/.vim/plugged with post-update hook
-" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-
-" Unmanaged plugin (manually installed and updated)
-" Plug '~/my-prototype-plugin'
-
-" Initialize plugin system
-call plug#end()
-
-let g:LanguageClient_serverCommands = {
-    \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls']
-    \ }
-
-nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
-
-" Required for operations modifying multiple buffers like rename.
-set hidden
+require'lspconfig'.dockerls.setup{}
+require'lspconfig'.bashls.setup{}
+require'lspconfig'.cssls.setup{}
+require'lspconfig'.gopls.setup{}
+require'lspconfig'.html.setup{}
+require'lspconfig'.jsonls.setup{}
+require'lspconfig'.pylsp.setup{}
+require'lspconfig'.rust_analyzer.setup{}
+require'lspconfig'.sqls.setup{}
+require'lspconfig'.texlab.setup{}
+require'lspconfig'.yamlls.setup{}
