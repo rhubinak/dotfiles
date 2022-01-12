@@ -26,9 +26,6 @@ set $menu swaymsg exec wofi
 #bindsym XF86AudioRaiseVolume exec amixer set Master 5%+
 #bindsym XF86AudioLowerVolume exec amixer set Master 5%-
 #bindsym XF86AudioMute exec amixer set Master toggle
-#bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
-#bindsym XF86MonBrightnessDown exec light -U 5
-#bindsym XF86MonBrightnessUp exec light -A 5
 
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% # Raise
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% # Lower
@@ -39,14 +36,12 @@ bindsym XF86AudioPause exec cmus-remote --pause
 # Screen brightness controls -- # https://github.com/haikarainen/light
 bindsym XF86MonBrightnessUp exec light -A 5    # increase screen brightness
 bindsym XF86MonBrightnessDown exec light -U 5  # decrease screen brightness
-#bindsym --locked XF86MonBrightnessUp exec --no-startup-id light -A 10
-#bindsym --locked XF86MonBrightnessDown exec --no-startup-id light -U 10
 
 ##
 ## Screenshots via flameshot
 ##
-bindsym Print exec flameshot gui -p ~/Downloads
-bindsym $mod+Print exec flameshot screen -r -p ~/Downloads
+bindsym Print exec QT_QPA_PLATFORM=xcb flameshot gui -p ~/Downloads
+bindsym $mod+Print exec QT_QPA_PLATFORM=xcb flameshot screen -r -p ~/Downloads
 
 ##
 ## TODO: set up ydotool as a text expander
@@ -56,18 +51,24 @@ bindsym $mod+Print exec flameshot screen -r -p ~/Downloads
 input * xkb_numlock enable
 
 ##
-## Idle configuration + Screen lock
+## Idle configuration
+##
+for_window [app_id="firefox"] inhibit_idle fullscreen
+for_window [app_id="mpv"] inhibit_idle fullscreen
+for_window [app_id="vlc"] inhibit_idle fullscreen
+
+##
+## Screen lock
 ##
 exec swayidle -w \
     timeout 600 'swaylock -f -e -c 000000' \
-    timeout 660 'swaymsg "output * dpms off"' \
-    resume 'swaymsg "output * dpms on"' \
     before-sleep 'swaylock -f -e -c 000000'
 
 #set $BIN_DIR ~/.local/bin
 #set $lock $BIN_DIR/lock.sh
 #bindsym $mod+l exec $lock
-bindsym $mod+l exec swaylock -e -c 000000 
+bindsym $mod+l exec swaylock -e -c 000000
+bindsym $mod+s exec systemctl suspend
 
 ### Output configuration
 #
@@ -285,7 +286,8 @@ mode "waybar" {
 }
 bindsym $mod+b mode "waybar"
 
-# Firefox about:config privacy.webrtc.legacyGlobalIndicator to false
+bindsym $mod+Control+Shift+Right move workspace to output right
+bindsym $mod+Control+Shift+Left move workspace to output left
 
 #xwayland disable
 
@@ -293,24 +295,30 @@ bindsym $mod+b mode "waybar"
 # Autostart:
 #
 exec_always 'pkill waybar; waybar'
-exec GDK_BACKEND=wayland
-exec CLUTTER_BACKEND=wayland
 exec wlsunset -l 49.2 -L 16.6
-#exec eval `ssh-agent -s`
+#exec dbus-daemon --session --address=unix:path=$XDG_RUNTIME_DIR/bus
+#exec dbus-update-activation-environment --systemd DISPLAY
 
 # Clipboard
 exec wl-paste -t text --watch clipman store
 
-workspace 2
+workspace 1
 exec mako --anchor top-right
 exec firefox-wayland
 
+workspace 2
+exec alacritty
+
 workspace 3
-exec evolution
-exec keepassxc --platform wayland
-#exec run_keybase
-exec ~/standard-notes-3.8.21-linux-x86_64.AppImage
-exec flatpak run im.riot.Riot
+exec alacritty
+
+workspace 4
+exec ~/standard-notes-3.9.13-linux-x86_64.AppImage
+
+workspace 5
 exec flatpak run org.signal.Signal
-#exec flatpak run org.telegram.desktop
-#include /etc/sway/config.d/*
+
+workspace 6
+exec keepassxc --platform wayland
+
+include /etc/sway/config.d/*

@@ -4,13 +4,9 @@
         "layer": "top",
         "position": "top",
         "height": 30,
-        "modules-left": ["sway/workspaces", "battery#bat1", "memory", "cpu", "temperature", "pulseaudio", "backlight"],
-        "modules-center": ["sway/window"],
-        "modules-right": ["sway/language", "network#vpn", "network#wifi", "network#ethernet", "network#disconnected", "custom/weather", "clock", "custom/poweroff"],
-        "sway/window": {
-            "format": "{} ",
-            "on-click": "swaymsg kill"
-        },
+        "modules-left": ["sway/workspaces", "battery", "memory", "cpu", "temperature", "pulseaudio", "backlight"],
+        "modules-center": ["clock"],
+        "modules-right": ["sway/language", "network#vpn", "network#wifi", "network#ethernet", "network#disconnected", "custom/weather", "custom/poweroff"],
         "clock": {
             "interval": 1,
             "format": "<b>{:%a %d %b %H:%M W%W}</b>"
@@ -18,10 +14,6 @@
         "cpu": {
             "format": " {usage}%",
             "tooltip": false
-        },
-        "disk": {
-            "format": " {}%",
-            "tooltip-format": "{used} / {total} used"
         },
         "memory": {
             "format": " {}%",
@@ -41,6 +33,9 @@
             "format-icons": ["", ""],
             "on-click": "wdisplays"
         },
+	"battery": {
+		"format": "{capacity}%"
+	},
         "battery#bat1": {
             "bat": "BAT0",
             "adapter": "AC",
@@ -59,7 +54,7 @@
             "format-icons": ["", "", "", "", ""]
         },
         "network#disconnected": {
-            "tooltip-format": "No connection!",
+            "tooltip-format": "No connection",
             "format-ethernet": "",
             "format-wifi": "",
             "format-linked": "",
@@ -67,7 +62,7 @@
             "on-click": "nm-connection-editor"
         },
         "network#ethernet": {
-            "interface": "enp*",
+            "interface": "enp2s0f0",
             "format-ethernet": "",
             "format-wifi": "",
             "format-linked": "",
@@ -76,7 +71,7 @@
             "on-click": "nm-connection-editor"
         },
         "network#wifi": {
-            "interface": "wlp*",
+            "interface": "wlp3s0",
             "format-ethernet": "",
             "format-wifi": " {essid} ({signalStrength}%)",
             "format-linked": "",
@@ -85,7 +80,7 @@
             "on-click": "nm-connection-editor"
         },
         "network#vpn": {
-            "interface": "tun0",
+            "interface": "psh-vpn",
             "format": "",
             "format-disconnected": "",
             "tooltip-format": "{ifname}: {ipaddr}/{cidr}",

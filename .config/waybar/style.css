@@ -1,7 +1,7 @@
 * {
     border: none;
     border-radius: 0;
-    font-family: "Fira Code", "Font Awesome 5 Free Solid";
+    font-family: "Fira Code";
     font-size: 16px;
     min-height: 0;
 }
@@ -85,11 +85,6 @@ window#waybar.empty {
 #battery.bat1.critical:not(.charging) {
     background-color: #f53c3c;
     color: #ffffff;
-    animation-name: blink;
-    animation-duration: 0.5s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
 }
 
 #temperature.critical {

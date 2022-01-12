@@ -54,13 +54,13 @@ mouse:
   # If this is `true`, the cursor is temporarily hidden when typing.
   hide_when_typing: true
 
-  url:
+  #url:
     # URL launcher
     #
     # This program is executed when clicking on a text which is recognized as a URL.
     # The URL is always added to the command as the last parameter.
     #launcher: open
-    launcher: firefox-wayland
+    #launcher: firefox-wayland
     # URL modifiers
     #
     # These are the modifiers that need to be held down for opening URLs when clicking

@@ -1,5 +1,9 @@
 #!/usr/bin/sh
 
+# Prereq:
+# Use Fedora i3 spin
+# Enable full disk encryption
+
 set -euo pipefail
 shopt -s failglob
 
@@ -11,12 +15,18 @@ fi
 USER=rh
 
 # Enable RPM Fusion repository
-su -c 'dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm'
+dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
 dnf upgrade --refresh
 
-# Enable full disk encryption
+# Use maildir instead of mbox
+
+gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll false
+
+#sed -i 's/i3/sway/g' /etc/sysconfig/desktop
+#/usr/share/lightdm/lighdm.conf.d/99-default.session.conf
 
 # Tweak dnf
 echo "fastestmirror=True" >> /etc/dnf/dnf.conf
@@ -29,10 +39,8 @@ dnf install \
     clang \
     clipman \
     cmus \
-    dnf-automatic \
     dnf-plugin-system-upgrade \
     dnf-plugins-core \
-    evolution \
     exa \
     exfalso \
     fd-find \
@@ -41,18 +49,16 @@ dnf install \
     firefox-wayland \
     flac \
     flameshot \
+    fwupd \
     git-delta \
-    gnome-tweak-tool \
     golang \
     htop \
     hugo \
     hyperfine \
-    iwd \
-    java-1.8.0-openjdk \
     jq \
-    jython \
     keepassxc \
     lame \
+    libreoffice \
     libX11-devel \
     libxcb \
     light \
@@ -68,23 +74,28 @@ dnf install \
     openssl-devel \
     p7zip \
     p7zip-plugins \
+    pass \
+    php \
+    php-process \
     powerline-fonts \
-    procs \
-    qbittorrent \
+    pulseaudio-utils \
+    python3-pip \
     qt5-qtwayland \
     restic \
     ripgrep \
+    rtorrent \
     sd \
+    selinux-policy-devel \
     sil-charis-fonts \
     skim \
-#    starship \
     sway \
     swayidle \
     swaylock \
-    texlive-collection-fontsrecommended \
-    texlive-collection-latexextra \
-    texlive-collection-mathscience \
     texlive-collection-xetex \
+    texlive-eurosym \
+    texlive-invoice2 \
+    texlive-siunitx \
+    texlive-translations \
     thefuck \
     tldr \
     util-linux-user \
@@ -96,10 +107,13 @@ dnf install \
     zathura-pdf-mupdf \
     zsh
 
-sudo dnf copr enable atim/bottom -y
-sudo dnf install bottom
+#sudo dnf copr enable atim/bottom -y
+#sudo dnf install bottom
 
 python3 -m pip install --upgrade yt-dlp
+
+# Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 #cargo install rmesg
 cargo install du-dust
@@ -122,6 +136,7 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
 # Fira code nerd fonts
+mkdir -p /usr/share/fonts/nerd-fira
 curl -fLo "/usr/share/fonts/nerd-fira/Fira Code Regular Nerd Font Complete.otf" \
     https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/complete/Fira%20Code%20Regular%20Nerd%20Font%20Complete.ttf
 fc-cache -v
@@ -129,17 +144,29 @@ fc-cache -v
 # Set ZSH_THEME="powerlevel10k/powerlevel10k" in ~/.zshrc
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
+# Neovim
+rustup component add rust-src
+curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-x86_64-unknown-linux-gnu.gz | gunzip -c - > ~/.local/bin/rust-analyzer
+chmod +x ~/.local/bin/rust-analyzer
+go get github.com/lighttiger2505/sqls
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+nvm install node
+npm install -g bash-language-server dockerfile-language-server-nodejs vscode-langservers-extracted yaml-language-server
+cargo install --git https://github.com/latex-lsp/texlab.git --locked
+#Restart neovim and run :PlugInstall to install
+
 # VS code
-rpm --import https://packages.microsoft.com/keys/microsoft.asc
-sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
-dnf install code
+#rpm --import https://packages.microsoft.com/keys/microsoft.asc
+#sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+#dnf install code
 
 # Remove unneeded stuff
-dnf remove virtualbox-* rhythmbox wpa_supplicant
+dnf remove fprintd
 systemctl stop bluetooth.service
 systemctl disable bluetooth.service
 
 # iwd
+dnf remove wpa_supplicant
 echo '[device]' >> /etc/NetworkManager/NetworkManager.conf
 echo 'wifi.backend=iwd' >> /etc/NetworkManager/NetworkManager.conf
 echo '[Network]' >> /etc/iwd/main.conf
@@ -273,10 +300,6 @@ echo 'install p8023 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
 echo 'install llc /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
 echo 'install p8022 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
 
-# Set a more restrictive umask.
-# This makes newly created files only readable by the owner.
-echo "umask 0077" >> /etc/profile.d/umask.sh
-
 # Configure firewall
 # Rules are stored in /etc/sysconfig/nftables.conf
 #systemctl enable nftables.service
@@ -284,12 +307,6 @@ echo "umask 0077" >> /etc/profile.d/umask.sh
 
 # Hugo
 #go get github.com/tdewolff/minify/cmd/minify
-
-# Sway
-#pip3 install --user psutil bumblebee-status
-
-# Enable fractional scaling
-#gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
 
 # Brave browser
 #sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
@@ -299,16 +316,6 @@ echo "umask 0077" >> /etc/profile.d/umask.sh
 # Workaround until the official repo plays nicely
 flatpak remote-add --if-not-exists flathub-beta https://flathub.org/beta-repo/flathub-beta.flatpakrepo
 flatpak install flathub-beta com.brave.Browser
-
-# Neovim
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-pip install python-lsp-server
-curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-x86_64-unknown-linux-gnu.gz | gunzip -c - > ~/.local/bin/rust-analyzer
-chmod +x ~/.local/bin/rust-analyzer
-go get github.com/lighttiger2505/sqls
-npm install -g bash-language-server dockerfile-language-server-nodejs vscode-langservers-extracted yaml-language-server
-cargo install --git https://github.com/latex-lsp/texlab.git --locked
-#Restart neovim and run :PlugInstall to install
 
 # configure MPV autosub
 pip3 install subliminal
@@ -323,14 +330,8 @@ pip3 install git+https://github.com/smacke/subsync
 # Java decompiler
 curl `curl -s https://api.github.com/repos/java-decompiler/jd-gui/releases/latest | jq -r .assets[0].browser_download_url` -soL > jd-gui.jar
 
-# Standard Notes
-
 # Fix Standard Notes on Gnome launcher issue
 #ln -sf ~/.local/share/applications/appimagekit-standard-notes.desktop /usr/share/applications/appimagekit-standard-notes.desktop
-
-# Rust
-curl https://sh.rustup.rs -sSf | sh
-#rustup component add clippy
 
 # Signal
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -343,9 +344,6 @@ npm i -g terminalizer
 
 # PurgeCSS
 npm i -g purgecss
-
-# Riot/Matrix/Vector/Element...whatever, just agree on a fucking name
-flatpak install flathub im.riot.Riot
 
 # AWS CLI
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"

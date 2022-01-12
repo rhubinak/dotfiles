@@ -125,26 +125,11 @@ if [ -f "$HOME/"'.platformsh/shell-config.rc' ]; then . "$HOME/"'.platformsh/she
 # Load rust utils
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# Load secrets
-test -r $HOME/.env && . $HOME/.env
-
-# Load platform.sh aliases
+# Load Platform.sh aliases
 test -r $HOME/psh/cse-aliases/cse-aliases.env && . $HOME/psh/cse-aliases/cse-aliases.env
 
-#export CLUTTER_BACKEND=wayland
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git --color=always"
-export FZF_DEFAULT_OPTS="--ansi"
-#export GDK_BACKEND=wayland
-export MOZ_ENABLE_WAYLAND=1
-export PATH="$HOME/.symfony/bin:$PATH"
-export QT_QPA_PLATFORM=wayland
-
-export BAT_THEME="Solarized (light)"
-export SOLARIZED_THEME="light"
-
 alias bc='bc -l'
-alias c='bat -pp --theme="Nord"'
+alias c='bat -pp --theme="Solarized (light)"'
 
 # https://www.atlassian.com/git/tutorials/dotfiles
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
@@ -164,13 +149,14 @@ alias n='nano'
 alias pdf='zathura'
 #alias ping='ping -c 4 -i.2'
 #alias ports='netstat -tulanp'
-alias ps='procs'
+alias ps='ps fauxw'
+#alias ps='procs'
 #alias socat='socat -d -d'
 #alias ssh-apex='TERM=vt100 ssh -t 46692'
 #alias ssh-apex='TERM=xterm-256color ssh -t 46692'
 #alias ssh-46692='ssh -t apex'
 alias time='hyperfine'
-alias top='btm'
+alias top='htop'
 alias untar='tar -zxvf'
 alias vi=nvim
 alias v=nvim
@@ -190,14 +176,16 @@ alias gc='git commit -m'
 #alias gl='git pull'
 
 # Update all repos in current dir
-alias git-pull-all="fd -H -g --max-depth 2 --type d .git | sed 's/.git//' | xargs -I {} git -C {} pull"
+alias git-pull-all="exa -d */.git | sed 's/\/.git//'| xargs -P10 -I{} git -C {} pull"
 
-# handy short cuts #
+# Handy shortcuts
 alias h='history'
 alias j='jobs -l'
 
-# Resize images to 25% of the original resolution
-alias resize25='convert -resize 25%'
+# Resize images like `resize what where target_px`
+resize() {
+    convert $1 -filter Triangle -define filter:support=2 -thumbnail $3 -unsharp 0.25x0.25+8+0.065 -dither None -posterize 136 -quality 82 -define jpeg:fancy-upsampling=off -define png:compression-filter=5 -define png:compression-level=9 -define png:compression-strategy=1 -define png:exclude-chunk=all -interlace None -colorspace sRGB -strip $2
+}
 
 # Record video from webcam, encode to x265 via GPU, drop duplicate frames and keep only last 5 mins
 alias record="ffmpeg -vaapi_device /dev/dri/renderD128 -f v4l2 -framerate 30 -video_size 1920x1080 -c:v mjpeg -i /dev/video4 -vf mpdecimate,setpts=N/FRAME_RATE/TB,format=nv12,hwupload -c:v hevc_vaapi -f segment -segment_time 300 -segment_wrap 2 webcam%01d.mkv"
@@ -212,10 +200,8 @@ if [ $UID -ne 0 ]; then
     alias zzz='systemctl suspend && swaylock -f -e -c 000000'
 fi
 
-eval "$(zoxide init zsh)"
-alias z='zoxide'
-
-#eval "$(starship init bash)"
+# Set a more restrictive umask. This makes newly created files only readable by the owner.
+umask 0077
 
 # BEGIN SNIPPET: SymfonyCloud (PHP) CLI configuration
 HOME=${HOME:-'/home/rh'}
@@ -235,9 +221,6 @@ export NVM_DIR="$HOME/.nvm"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# TODO: start only one ssh-agent and reuse the created one
-eval `ssh-agent -s` > /dev/null
 
 # BEGIN SNIPPET: OVHcloud Web PaaS CLI configuration
 HOME=${HOME:-'/home/rh'}
