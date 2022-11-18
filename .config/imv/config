@@ -1,0 +1,4 @@
+[binds]
+
+# Delete open image by pressing 'SHIFT+X'
+<Shift+X> = exec rm "$imv_current_file"

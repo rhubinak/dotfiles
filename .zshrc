@@ -130,6 +130,8 @@ test -r $HOME/psh/cse-aliases/cse-aliases.env && . $HOME/psh/cse-aliases/cse-ali
 
 alias bc='bc -l'
 alias c='bat -pp --theme="Solarized (light)"'
+alias cal='vdirsyncer sync && ikhal'
+alias code='codium --ozone-platform=wayland --enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer'
 
 # https://www.atlassian.com/git/tutorials/dotfiles
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
@@ -141,7 +143,7 @@ alias find='fd'
 alias grep='rg -i -n -uuu'
 
 #alias ls='exa -G  --color auto --icons -a -s type'
-alias ls='exa -l --color always --icons -a -s type'
+alias l='exa -l --color always --icons -a -s type'
 alias m='mdcat'
 alias mkdir='mkdir -pv'
 alias mpv='mpv --stop-screensaver --gpu-context=wayland'
@@ -151,6 +153,7 @@ alias pdf='zathura'
 #alias ports='netstat -tulanp'
 alias ps='ps fauxw'
 #alias ps='procs'
+alias reboot='systemctl reboot'
 #alias socat='socat -d -d'
 #alias ssh-apex='TERM=vt100 ssh -t 46692'
 #alias ssh-apex='TERM=xterm-256color ssh -t 46692'
@@ -162,6 +165,7 @@ alias vi=nvim
 alias v=nvim
 alias ytdl='yt-dlp -x --audio-format "mp3" --audio-quality 0 --add-header "Cookie:"'
 alias zrc='nvim ~/.zshrc && source ~/.zshrc'
+alias zzz='systemctl suspend && swaylock -f -e -c 000000'
 
 # git aliases (others provided by the git plugin)
 #alias g='git'
@@ -188,16 +192,14 @@ resize() {
 }
 
 # Record video from webcam, encode to x265 via GPU, drop duplicate frames and keep only last 5 mins
-alias record="ffmpeg -vaapi_device /dev/dri/renderD128 -f v4l2 -framerate 30 -video_size 1920x1080 -c:v mjpeg -i /dev/video4 -vf mpdecimate,setpts=N/FRAME_RATE/TB,format=nv12,hwupload -c:v hevc_vaapi -f segment -segment_time 300 -segment_wrap 2 webcam%01d.mkv"
+alias record="ffmpeg -an -vaapi_device /dev/dri/renderD128 -f v4l2 -framerate 30 -video_size 1920x1080 -c:v mjpeg -i /dev/video4 -vf mpdecimate,setpts=N/FRAME_RATE/TB,format=nv12,hwupload -c:v hevc_vaapi -f segment -segment_time 300 -segment_wrap 2 webcam%01d.mkv"
 
 # if user is not root, pass all commands via sudo #
 if [ $UID -ne 0 ]; then
     alias dmesg='sudo dmesg'
     alias firewall='sudo nft list ruleset'
-    alias reboot='reboot'
-    alias update='sudo dnf update'
+    alias update='sudo dnf update && flatpak update'
     alias get='sudo dnf install'
-    alias zzz='systemctl suspend && swaylock -f -e -c 000000'
 fi
 
 # Set a more restrictive umask. This makes newly created files only readable by the owner.
@@ -226,3 +228,8 @@ export NVM_DIR="$HOME/.nvm"
 HOME=${HOME:-'/home/rh'}
 export PATH="$HOME/"'.webpaas-cli/bin':"$PATH"
 if [ -f "$HOME/"'.webpaas-cli/shell-config.rc' ]; then . "$HOME/"'.webpaas-cli/shell-config.rc'; fi # END SNIPPET
+
+# BEGIN SNIPPET: Shopware PaaS CLI configuration
+HOME=${HOME:-'/home/rh'}
+export PATH="$HOME/"'.shopware-cli/bin':"$PATH"
+if [ -f "$HOME/"'.shopware-cli/shell-config.rc' ]; then . "$HOME/"'.shopware-cli/shell-config.rc'; fi # END SNIPPET

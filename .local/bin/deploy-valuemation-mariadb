@@ -11,11 +11,12 @@ mysql_secure_installation
 # Add this line under [mysqld] section in /etc/my.cnf.d/mariadb-server.cnf
 #bind-address=127.0.0.1
 
-#CREATE DATABASE vm51_full CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
-#CREATE DATABASE vm51_orig CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
-
-#CREATE DATABASE vm52_full CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
-#CREATE DATABASE vm52_orig CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
-
-#CREATE DATABASE vm53_full CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
-#CREATE DATABASE vm53_orig CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
+PASSWORD = ""
+mysql -u root --password="${PASSWORD}" <<EOF
+CREATE DATABASE vm51_full CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
+CREATE DATABASE vm51_orig CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
+CREATE DATABASE vm52_full CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
+CREATE DATABASE vm52_orig CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
+CREATE DATABASE vm53_full CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
+CREATE DATABASE vm53_orig CHARACTER SET = 'utf8' COLLATE = 'utf8_general_ci';
+EOF

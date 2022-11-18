@@ -9,7 +9,11 @@
         "modules-right": ["sway/language", "network#vpn", "network#wifi", "network#ethernet", "network#disconnected", "custom/weather", "custom/poweroff"],
         "clock": {
             "interval": 1,
-            "format": "<b>{:%a %d %b %H:%M W%W}</b>"
+            "format": "<b>{:%a %d %b %H:%M W%W}</b>",
+            "locale": "sk_SK.UTF-8",
+            "timezone": "Europe/Prague",
+            "tooltip-format": "<big>{:%B}</big>\n<tt>{calendar}</tt>",
+            "on-click": "ikhal"
         },
         "cpu": {
             "format": " {usage}%",
@@ -20,7 +24,7 @@
             "tooltip-format": "{used:0.1f}G / {total:0.1f}G used"
         },
         "temperature": {
-            "critical-threshold": 80,
+            "critical-threshold": 90,
             "format": "{icon} {temperatureC}°C",
             "format-icons": ["", "", "", "", ""]
         },
@@ -101,7 +105,6 @@
                 "car": "",
                 "default": ["", "", ""]
             },
-            "on-click": "pavucontrol"
         },
         "custom/weather": {
             "return-type": "json",
@@ -113,6 +116,16 @@
             "tooltip": false,
             "format": "",
             "on-click": "bash $HOME/.config/waybar/scripts/poweroff.sh"
+        },
+        "custom/khal": {
+            "format": "{}",
+            "format-icons": {
+                "default": ""
+            },
+            "tooltip": true,
+            "interval": 300,
+            "exec": "python $HOME/.config/waybar/scripts/waybar-khal.py",
+            "return-type": "json"
         }
     }
 ]

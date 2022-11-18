@@ -1,0 +1,14 @@
+[calendars]
+[[calendar]]
+path = ~/.config/vdirsyncer/calendars/408ff2ff-2e92-43a3-ac50-711e475ef2e1/
+color = dark green
+
+[locale]
+local_timezone= Europe/Prague
+default_timezone= Europe/Prague
+timeformat= %H:%M
+dateformat= %d.%m.
+longdateformat= %d.%m.%Y
+datetimeformat= %d.%m. %H:%M
+longdatetimeformat= %d.%m.%Y %H:%M
+weeknumbers=left

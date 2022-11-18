@@ -3,7 +3,7 @@
 set -euo pipefail
 shopt -s failglob
 
-# TODO: Use xargs -0 -n4 -P4 lame --preset extreme --noreplaygain -t instead of GNU Parallel ?
+# TODO: Use xargs -0 -n4 -P$(nproc) lame --preset extreme --noreplaygain -t instead of GNU Parallel ?
 
 find . -name '*.flac' -type f | parallel 'flac -d'
 find . -name '*.wav' -type f | parallel 'lame --preset extreme --noreplaygain -t'

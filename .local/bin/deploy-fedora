@@ -25,6 +25,9 @@ dnf upgrade --refresh
 gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
 gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll false
 
+#gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 50
+#gsettings set org.gnome.desktop.peripherals.keyboard delay 200
+
 #sed -i 's/i3/sway/g' /etc/sysconfig/desktop
 #/usr/share/lightdm/lighdm.conf.d/99-default.session.conf
 
@@ -50,13 +53,16 @@ dnf install \
     flac \
     flameshot \
     fwupd \
+    gimp \
     git-delta \
     golang \
     htop \
     hugo \
     hyperfine \
+    ImageMagick \
+    imv \
     jq \
-    keepassxc \
+    khal \
     lame \
     libreoffice \
     libX11-devel \
@@ -66,6 +72,7 @@ dnf install \
     mako \
     mp3gain \
     mpv \
+    mygnuhealth \
     nano \
     ncdu \
     neovim \
@@ -75,17 +82,23 @@ dnf install \
     p7zip \
     p7zip-plugins \
     pass \
+    pass-otp \
     php \
     php-process \
+    pinentry-gtk \
     powerline-fonts \
     pulseaudio-utils \
+    pv \
+    python-lsp-server \
     python3-pip \
+    qbittorrent \
     qt5-qtwayland \
     restic \
     ripgrep \
-    rtorrent \
+    rust-analyzer \
     sd \
     selinux-policy-devel \
+    ShellCheck \
     sil-charis-fonts \
     skim \
     sway \
@@ -100,6 +113,7 @@ dnf install \
     tldr \
     util-linux-user \
     waybar \
+    wdisplays \
     wl-clipboard \
     wlsunset \
     wofi \
@@ -107,10 +121,13 @@ dnf install \
     zathura-pdf-mupdf \
     zsh
 
+# passff-host
+curl -sSL github.com/passff/passff-host/releases/latest/download/install_host_app.sh | bash -s -- firefox
+
 #sudo dnf copr enable atim/bottom -y
 #sudo dnf install bottom
 
-python3 -m pip install --upgrade yt-dlp
+pip3 install --user black pylint yt-dlp yq
 
 # Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -120,6 +137,9 @@ cargo install du-dust
 
 # Markdown viewer
 cargo install mdcat
+
+# Tiny IRC client
+cargo install --git https://github.com/osa1/tiny
 
 # Nushell
 #cargo install nu --features=extra
@@ -144,24 +164,100 @@ fc-cache -v
 # Set ZSH_THEME="powerlevel10k/powerlevel10k" in ~/.zshrc
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
-# Neovim
-rustup component add rust-src
-curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-x86_64-unknown-linux-gnu.gz | gunzip -c - > ~/.local/bin/rust-analyzer
-chmod +x ~/.local/bin/rust-analyzer
-go get github.com/lighttiger2505/sqls
+# Helix
+sudo dnf copr enable varlad/helix
+sudo dnf install helix
+go install golang.org/x/tools/gopls@latest
+
+#rustup component add rust-src
+#curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-x86_64-unknown-linux-gnu.gz | gunzip -c - > ~/.local/bin/rust-analyzer
+#chmod +x ~/.local/bin/rust-analyzer
+#go get github.com/lighttiger2505/sqls
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 nvm install node
-npm install -g bash-language-server dockerfile-language-server-nodejs vscode-langservers-extracted yaml-language-server
+npm install -g bash-language-server dockerfile-language-server-nodejs pyright vscode-langservers-extracted yaml-language-server
 cargo install --git https://github.com/latex-lsp/texlab.git --locked
 #Restart neovim and run :PlugInstall to install
 
-# VS code
-#rpm --import https://packages.microsoft.com/keys/microsoft.asc
-#sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
-#dnf install code
+# Upgrade NodeJS
+# nvm install stable --reinstall-packages-from=current
+
+# Upgrade npm
+# npm update -g
+
+# Monica
+dnf install \
+    composer
+    mariadb-server \
+    nginx \
+    php \
+    php-bcmath \
+    php-cli \
+    php-curl \
+    php-common \
+    php-fpm \
+    php-gd \
+    php-gmp \
+    php-intl \
+    php-json \
+    php-mbstring \
+    php-mysql \
+    php-opcache \
+    php-redis \
+    php-xml \
+    php-zip \
+
+# VScodium
+sudo tee -a /etc/yum.repos.d/vscodium.repo << 'EOF'
+[gitlab.com_paulcarroty_vscodium_repo]
+name=gitlab.com_paulcarroty_vscodium_repo
+baseurl=https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/rpms/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg
+metadata_expire=1h
+EOF
+dnf install codium
+
+# Librewolf
+rpm --import https://keys.openpgp.org/vks/v1/by-fingerprint/034F7776EF5E0C613D2F7934D29FBD5F93C0CFC3
+dnf config-manager --add-repo https://rpm.librewolf.net
+dnf update
+dnf install librewolf
+
+# Librewolf: remove microphone indicator
+# Set toolkit.legacyUserProfileCustomizations.stylesheets to True in about:config
+cd ~/.librewolf/
+if [[ $(grep '\[Profile[^0]\]' profiles.ini) ]]
+then PROFPATH=$(grep -E '^\[Profile|^Path|^Default' profiles.ini | grep -1 '^Default=1' | grep '^Path' | cut -c6-)
+else PROFPATH=$(grep 'Path=' profiles.ini | sed 's/^Path=//')
+fi
+mkdir $PROFPATH/chrome
+cat > $PROFPATH/chrome/userChrome.css << "EOF"
+#webrtcIndicator {
+  display: none;
+}
+EOF
 
 # Remove unneeded stuff
-dnf remove fprintd
+dnf remove \
+    evince \
+    firefox \
+    fprintd \
+    gnome-boxes \
+    gnome-calendar \
+    gnome-maps \
+    gnome-terminal \
+    gnome-tour \
+    gnome-video-effects \
+    gnome-weather \
+    httpd \
+    rhythmbox \
+    totem \
+    totem-pl-parser \
+    virtualbox-guest-additions
+
 systemctl stop bluetooth.service
 systemctl disable bluetooth.service
 
@@ -176,136 +272,141 @@ echo 'AutoConnect=true' >> /etc/iwd/main.conf
 systemctl restart NetworkManager
 
 ## Kernel hardening
-
+cat > /etc/sysctl.d/99-sysctl.conf << "EOF"
 # Restrict the kernel logs to root only
-echo 'kernel.dmesg_restrict=1' >> /etc/sysctl.d/99-sysctl.conf
+kernel.dmesg_restrict=1
 
 # Disable kexec
-echo 'kernel.kexec_load_disabled=1' >> /etc/sysctl.d/99-sysctl.conf
+kernel.kexec_load_disabled=1
 
 # Hide the kernel symbols in /proc/kallsyms
-echo 'kernel.kptr_restrict=2' >> /etc/sysctl.d/99-sysctl.conf
-
-# Restrict the BPF JIT compiler to root only
-echo 'kernel.unprivileged_bpf_disabled=1' >> /etc/sysctl.d/99-sysctl.conf
-
-# Restrict the use of the ptrace() syscall to root only
-echo 'kernel.yama.ptrace_scope=2' >> /etc/sysctl.d/99-sysctl.conf
-
-# Harden the JIT compiler against certain attacks such as heap spraying attacks
-echo 'net.core.bpf_jit_harden=2' >> /etc/sysctl.d/99-sysctl.conf
-
-# Enable source validation to prevent certain IP spoofing methods
-echo 'net.ipv4.conf.all.rp_filter=1' >> /etc/sysctl.d/99-sysctl.conf
-echo 'net.ipv4.conf.default.rp_filter=1' >> /etc/sysctl.d/99-sysctl.conf
-
-# Disable ICMP redirect acceptance
-#echo 'net.ipv4.conf.all.accept_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
-echo 'net.ipv4.conf.default.accept_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
-echo 'net.ipv4.conf.all.secure_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
-echo 'net.ipv4.conf.default.secure_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
-echo 'net.ipv6.conf.all.accept_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
-echo 'net.ipv6.conf.default.accept_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
-
-# Disable ICMP redirect sending
-echo 'net.ipv4.conf.all.send_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
-echo 'net.ipv4.conf.default.send_redirects=0' >> /etc/sysctl.d/99-sysctl.conf
-
-# ignore ICMP requests
-echo 'net.ipv4.icmp_echo_ignore_all=1' >> /etc/sysctl.d/99-sysctl.conf
-echo 'net.ipv6.icmp.echo_ignore_all=1' >> /etc/sysctl.d/99-sysctl.conf
-
-# Improve ASLR effectiveness for mmap
-echo 'vm.mmap_rnd_bits=32' >> /etc/sysctl.d/99-sysctl.conf
-echo 'vm.mmap_rnd_compat_bits=16' >> /etc/sysctl.d/99-sysctl.conf
-
-# Disable TCP timestamps
-echo 'net.ipv4.tcp_timestamps=0' >> /etc/sysctl.d/99-sysctl.conf
-
-# Disable SACK
-echo 'net.ipv4.tcp_sack=0' >> /etc/sysctl.d/99-sysctl.conf
-
-# Disable the SysRq key
-echo 'kernel.sysrq=0' >> /etc/sysctl.d/99-sysctl.conf
-
-# Enable TCP Fast Open
-echo 'net.ipv4.tcp_fastopen=3' >> /etc/sysctl.d/99-sysctl.conf
-
-# Prevent time-wait assassination attacks
-echo 'net.ipv4.tcp_rfc1337=1' >> /etc/sysctl.d/99-sysctl.conf
-
-# Enable TCP syncookies to prevent SYN flood attacks
-#echo 'net.ipv4.tcp_syncookies=1' >> /etc/sysctl.d/99-sysctl.conf
-
-# Adjust swapiness
-echo 'vm.swappiness=10' >> /etc/sysctl.d/99-sysctl.conf
+kernel.kptr_restrict=2
 
 # Disable NMI watchdog
-echo 'kernel.nmi_watchdog=0' >> /etc/sysctl.d/99-sysctl.conf
-echo 'blacklist iTCO_wdt' >> /etc/modprobe.d/watchdog.conf
-echo 'blacklist iTCO_vendor_support' >> /etc/modprobe.d/watchdog.conf
+kernel.nmi_watchdog=0
+
+# Disable the SysRq key
+kernel.sysrq=0
+
+# Restrict the BPF JIT compiler to root only
+kernel.unprivileged_bpf_disabled=1
+
+# Restrict the use of the ptrace() syscall to root only
+kernel.yama.ptrace_scope=2
+
+# Harden the JIT compiler against certain attacks such as heap spraying attacks
+net.core.bpf_jit_harden=2
+
+# Enable source validation to prevent certain IP spoofing methods
+net.ipv4.conf.all.rp_filter=1
+net.ipv4.conf.default.rp_filter=1
+
+# Disable ICMP redirect acceptance
+#net.ipv4.conf.all.accept_redirects=0
+net.ipv4.conf.default.accept_redirects=0
+net.ipv4.conf.all.secure_redirects=0
+net.ipv4.conf.default.secure_redirects=0
+net.ipv6.conf.all.accept_redirects=0
+net.ipv6.conf.default.accept_redirects=0
+
+# Disable ICMP redirect sending
+net.ipv4.conf.all.send_redirects=0
+net.ipv4.conf.default.send_redirects=0
+
+# Ignore ICMP requests
+net.ipv4.icmp_echo_ignore_all=1
+net.ipv6.icmp.echo_ignore_all=1
+
+# Disable TCP timestamps
+net.ipv4.tcp_timestamps=0
+
+# Disable SACK
+net.ipv4.tcp_sack=0
+
+# Enable TCP Fast Open
+net.ipv4.tcp_fastopen=3
+
+# Prevent time-wait assassination attacks
+net.ipv4.tcp_rfc1337=1
+
+# Enable TCP syncookies to prevent SYN flood attacks
+#net.ipv4.tcp_syncookies=1
+
+# Improve ASLR effectiveness for mmap
+vm.mmap_rnd_bits=32
+vm.mmap_rnd_compat_bits=16
+
+# Adjust swapiness
+vm.swappiness=10
+
+EOF
+
+## Disable kernel modules
+cat > /etc/modprobe.d/custom-blocklist.conf << "EOF"
+# Disable NMI watchdog
+blacklist iTCO_wdt
+blacklist iTCO_vendor_support
+
+# Disable Bluetooth
+install bluetooth /bin/true
+install btusb /bin/true
+
+# Disable Firewire
+install firewire-core /bin/true
+
+# Disable Thunderbolt
+install thunderbolt /bin/true
+
+# Disable Intel ME
+install mei /bin/true
+install mei-me /bin/true
+
+# Disable PC Speaker to disable beeps for discretion purposes.
+install pcspkr /bin/true
+
+# Disable conntrack helper.
+options nf_conntrack nf_conntrack_helper=0
+
+# Disable uncommon filesystems.
+install cramfs /bin/true
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install udf /bin/true
+
+# Disable uncommon network protocols.
+install dccp /bin/true
+install sctp /bin/true
+install rds /bin/true
+install tipc /bin/true
+install n-hdlc /bin/true
+install ax25 /bin/true
+install netrom /bin/true
+install x25 /bin/true
+install rose /bin/true
+install decnet /bin/true
+install econet /bin/true
+install af_802154 /bin/true
+install ipx /bin/true
+install appletalk /bin/true
+install psnap /bin/true
+install p8023 /bin/true
+install llc /bin/true
+install p8022 /bin/true
+EOF
 
 # Force DNSSEC, DNS over TLS and Cloudflare DNS servers. Will override router settings.
 echo 'DNS=1.1.1.1 8.8.8.8' >> /etc/systemd/resolved.conf
 echo 'DNSSEC=yes' >> /etc/systemd/resolved.conf
 #echo 'DNSOverTLS' >> /etc/systemd/resolved.conf
 
-## Disable kernel modules
-
-# Disable Bluetooth
-echo 'install bluetooth /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install btusb /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-
-# Disable Firewire
-echo 'install firewire-core /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-
-# Disable Thunderbolt
-echo 'install thunderbolt /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-
-# Disable Intel ME
-echo 'install mei /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install mei-me /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-
-# Disable PC Speaker to disable beeps for discretion purposes.
-echo 'install pcspkr /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-
-# Disable conntrack helper.
-echo 'options nf_conntrack nf_conntrack_helper=0' >> /etc/modprobe.d/custom-blocklist.conf
-
-# Disable uncommon filesystems.
-echo 'install cramfs /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install freevxfs /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install jffs2 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install hfs /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install hfsplus /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install udf /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-
-# Disable uncommon network protocols.
-echo 'install dccp /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install sctp /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install rds /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install tipc /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install n-hdlc /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install ax25 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install netrom /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install x25 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install rose /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install decnet /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install econet /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install af_802154 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install ipx /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install appletalk /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install psnap /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install p8023 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install llc /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-echo 'install p8022 /bin/true' >> /etc/modprobe.d/custom-blocklist.conf
-
 # Configure firewall
 # Rules are stored in /etc/sysconfig/nftables.conf
 #systemctl enable nftables.service
 #systemctl start nftables.service
 
-# Hugo
+# Hugo minifier
 #go get github.com/tdewolff/minify/cmd/minify
 
 # Brave browser
@@ -330,16 +431,19 @@ pip3 install git+https://github.com/smacke/subsync
 # Java decompiler
 curl `curl -s https://api.github.com/repos/java-decompiler/jd-gui/releases/latest | jq -r .assets[0].browser_download_url` -soL > jd-gui.jar
 
-# Fix Standard Notes on Gnome launcher issue
-#ln -sf ~/.local/share/applications/appimagekit-standard-notes.desktop /usr/share/applications/appimagekit-standard-notes.desktop
+# Standard Notes
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub org.standardnotes.standardnotes
 
 # Signal
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak install flathub org.signal.Signal
 
+# Tutanota
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub com.tutanota.Tutanota
+
 # Terminalizer
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-nvm install node
 npm i -g terminalizer
 
 # PurgeCSS
@@ -350,14 +454,11 @@ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip
 unzip awscliv2.zip
 sudo ./aws/install
 
-# Firefox: remove microphone indicator
-# Set toolkit.legacyUserProfileCustomizations.stylesheets to True in about:config
-cd ~/.mozilla/firefox/
-if [[ $(grep '\[Profile[^0]\]' profiles.ini) ]]
-then PROFPATH=$(grep -E '^\[Profile|^Path|^Default' profiles.ini | grep -1 '^Default=1' | grep '^Path' | cut -c6-)
-else PROFPATH=$(grep 'Path=' profiles.ini | sed 's/^Path=//')
-fi
-mkdir $PROFPATH/chrome
-echo "#webrtcIndicator {" >> $PROFPATH/chrome/userChrome.css
-echo "  display: none;" >> $PROFPATH/chrome/userChrome.css
-echo "}" >> $PROFPATH/chrome/userChrome.css
+# Make phone work
+dnf install jmtpfs
+mkdir ~/phone
+chmod 755 ~/phone
+# Connect
+jmtpfs ~/phone
+# Disconnect
+fusermount -u ~/phone

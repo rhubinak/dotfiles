@@ -1,8 +1,0 @@
-#!/usr/bin/sh
-
-set -euo pipefail
-shopt -s failglob
-
-sed -n '/<ca>/,/<\/ca>/{//!p}' $1 > $HOME/.cert/nm-openvpn/Platform.sh-ca.pem
-sed -n '/<cert>/,/<\/cert>/{//!p}' $1 > $HOME/.cert/nm-openvpn/Platform.sh-cert.pem
-sed -n '/<key>/,/<\/key>/{//!p}' $1 > $HOME/.cert/nm-openvpn/Platform.sh-key.pem

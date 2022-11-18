@@ -44,6 +44,7 @@ apk add \
     cmus \
     connman \
     curl \
+    dbus \
     dmenu \
     eudev \
     evolution \
@@ -81,6 +82,7 @@ apk add \
     openssh-client \
     p7zip \
     parallel \
+    pipewire \
     py3-pip \
     py3-psutil \
     python3 \
@@ -100,6 +102,8 @@ apk add \
     texlive-xetex \
     texmf-dist-most \
     wayland-dev \
+    wireplumber \
+    xdg-desktop-portal-wlr \
     xorg-server-xwayland \
     youtube-dl \
     zathura \
@@ -124,9 +128,11 @@ append_line "unicode=\"YES\"" '/etc/rc.conf'
 rc-update add nftables
 
 # Configure automatic updates
-echo "#!/bin/sh" >> /etc/periodic/hourly/autoupdate
-echo "apk update" >> /etc/periodic/hourly/autoupdate
-echo "apk upgrade" >> /etc/periodic/hourly/autoupdate
+cat > /etc/periodic/hourly/autoupdate << "EOF"
+#!/bin/sh
+apk update
+apk upgrade
+EOF
 chmod a+x /etc/periodic/hourly/autoupdate
 
 # Configure user.js file

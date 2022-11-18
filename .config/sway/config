@@ -27,21 +27,22 @@ set $menu swaymsg exec wofi
 #bindsym XF86AudioLowerVolume exec amixer set Master 5%-
 #bindsym XF86AudioMute exec amixer set Master toggle
 
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% # Raise
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% # Lower
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle # Mute
-bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
-bindsym XF86AudioPause exec cmus-remote --pause
+# use --locked so the keys can be accessed while sway is locked!!
+bindsym --locked XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% # Raise
+bindsym --locked XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% # Lower
+bindsym --locked XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle # Mute
+bindsym --locked XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+bindsym --locked XF86AudioPause exec cmus-remote --pause
 
 # Screen brightness controls -- # https://github.com/haikarainen/light
-bindsym XF86MonBrightnessUp exec light -A 5    # increase screen brightness
-bindsym XF86MonBrightnessDown exec light -U 5  # decrease screen brightness
+bindsym --locked XF86MonBrightnessUp exec light -A 5    # increase screen brightness
+bindsym --locked XF86MonBrightnessDown exec light -U 5  # decrease screen brightness
 
 ##
 ## Screenshots via flameshot
 ##
-bindsym Print exec QT_QPA_PLATFORM=xcb flameshot gui -p ~/Downloads
-bindsym $mod+Print exec QT_QPA_PLATFORM=xcb flameshot screen -r -p ~/Downloads
+bindsym Print exec XDG_CURRENT_DESKTOP=sway flameshot gui -p ~/Downloads
+bindsym $mod+Print exec XDG_CURRENT_DESKTOP=sway flameshot screen -r -p ~/Downloads
 
 ##
 ## TODO: set up ydotool as a text expander
@@ -62,11 +63,11 @@ for_window [app_id="vlc"] inhibit_idle fullscreen
 ##
 exec swayidle -w \
     timeout 600 'swaylock -f -e -c 000000' \
-    before-sleep 'swaylock -f -e -c 000000'
+    timeout 600 'swaymsg "output * dpms off"' \
+    resume 'swaymsg "output * dpms on"' \
+    before-sleep 'swaylock -f -e -c 000000'\
+    unlock '~/.local/bin/renew-cert'
 
-#set $BIN_DIR ~/.local/bin
-#set $lock $BIN_DIR/lock.sh
-#bindsym $mod+l exec $lock
 bindsym $mod+l exec swaylock -e -c 000000
 bindsym $mod+s exec systemctl suspend
 
@@ -84,6 +85,7 @@ output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 #output eDP-1 position 0,0
 output HDMI-A-1 position 0,0
 output DP-2 transform 270 position 2560,0
+#output "Lenovo Group Limited LEN Y27q-20 0x00007F58" adaptive_sync on
 #focus output HDMI-A-1
 
 # Clamshell mode
@@ -168,6 +170,7 @@ input "type:keyboard" {
     bindsym $mod+Shift+Right move right
 
     # Use ALT+TAB to switch between windows
+    workspace_auto_back_and_forth yes
     bindsym Mod1+tab workspace back_and_forth
     #bindsym Mod1+tab workspace next_on_output 
     #bindsym Mod1+Shift+tab workspace prev_on_output 
@@ -175,17 +178,29 @@ input "type:keyboard" {
 #
 # Workspaces:
 #
-    # Switch to workspace
+    # Switch to workspace (totally inelegant hack to use cz/sk layout as I am lazy a lot)
     bindsym $mod+1 workspace number 1
+    bindsym $mod+plus workspace number 1
     bindsym $mod+2 workspace number 2
+    bindsym $mod+ecaron workspace number 2
+    bindsym $mod+lcaron workspace number 2
     bindsym $mod+3 workspace number 3
+    bindsym $mod+scaron workspace number 3
     bindsym $mod+4 workspace number 4
+    bindsym $mod+ccaron workspace number 4
     bindsym $mod+5 workspace number 5
+    bindsym $mod+rcaron workspace number 5
+    bindsym $mod+tcaron workspace number 5
     bindsym $mod+6 workspace number 6
+    bindsym $mod+zcaron workspace number 6
     bindsym $mod+7 workspace number 7
+    bindsym $mod+yacute workspace number 7
     bindsym $mod+8 workspace number 8
+    bindsym $mod+aacute workspace number 8
     bindsym $mod+9 workspace number 9
+    bindsym $mod+iacute workspace number 9
     bindsym $mod+0 workspace number 10
+    bindsym $mod+eacute workspace number 10
     # Move focused container to workspace
     bindsym $mod+Shift+1 move container to workspace number 1
     bindsym $mod+Shift+2 move container to workspace number 2
@@ -289,7 +304,7 @@ bindsym $mod+b mode "waybar"
 bindsym $mod+Control+Shift+Right move workspace to output right
 bindsym $mod+Control+Shift+Left move workspace to output left
 
-#xwayland disable
+xwayland disable
 
 #
 # Autostart:
@@ -298,27 +313,34 @@ exec_always 'pkill waybar; waybar'
 exec wlsunset -l 49.2 -L 16.6
 #exec dbus-daemon --session --address=unix:path=$XDG_RUNTIME_DIR/bus
 #exec dbus-update-activation-environment --systemd DISPLAY
+#dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 
 # Clipboard
 exec wl-paste -t text --watch clipman store
 
 workspace 1
 exec mako --anchor top-right
+#exec librewolf --socket=wayland
 exec firefox-wayland
 
 workspace 2
-exec alacritty
+exec codium --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer
+exec alacritty -e $SHELL -c 'cd ~/psh/magento-cloud-enterprise && $SHELL'
+exec alacritty -e $SHELL -c 'cd ~/psh/platformsh-enterprise && $SHELL'
+exec alacritty -e $SHELL -c 'cd ~/psh/checkmate && $SHELL'
 
 workspace 3
-exec alacritty
+exec alacritty -e $SHELL -c 'cat ~/scratchpad.txt && $SHELL'
+#exec alacritty -e $SHELL -c 'vdirsyncer sync && ikhal'
+#exec alacritty -e aerc
 
 workspace 4
-exec ~/standard-notes-3.9.13-linux-x86_64.AppImage
+exec flatpak override --user --env=USE_WAYLAND=1 org.standardnotes.standardnotes --socket=wayland && flatpak run org.standardnotes.standardnotes
 
 workspace 5
-exec flatpak run org.signal.Signal
+exec flatpak run org.signal.Signal --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer
 
 workspace 6
-exec keepassxc --platform wayland
+exec flatpak run com.tutanota.Tutanota --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer
 
 include /etc/sway/config.d/*
