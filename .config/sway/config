@@ -74,7 +74,7 @@ bindsym $mod+s exec systemctl suspend
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+#output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 #
 # Example configuration:
 #
@@ -324,7 +324,7 @@ exec mako --anchor top-right
 exec firefox-wayland
 
 workspace 2
-exec codium --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer
+exec codium --ozone-platform=wayland --enable-features=UseOzonePlatform
 exec alacritty -e $SHELL -c 'cd ~/psh/magento-cloud-enterprise && $SHELL'
 exec alacritty -e $SHELL -c 'cd ~/psh/platformsh-enterprise && $SHELL'
 exec alacritty -e $SHELL -c 'cd ~/psh/checkmate && $SHELL'
@@ -338,9 +338,9 @@ workspace 4
 exec flatpak override --user --env=USE_WAYLAND=1 org.standardnotes.standardnotes --socket=wayland && flatpak run org.standardnotes.standardnotes
 
 workspace 5
-exec flatpak run org.signal.Signal --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer
+exec flatpak run org.signal.Signal --ozone-platform=wayland --enable-features=UseOzonePlatform
 
-workspace 6
-exec flatpak run com.tutanota.Tutanota --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer
+#workspace 6
+#exec ~/tutanota-desktop-linux.AppImage --ozone-platform=wayland --enable-features=UseOzonePlatform
 
 include /etc/sway/config.d/*

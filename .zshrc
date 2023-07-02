@@ -131,7 +131,8 @@ test -r $HOME/psh/cse-aliases/cse-aliases.env && . $HOME/psh/cse-aliases/cse-ali
 alias bc='bc -l'
 alias c='bat -pp --theme="Solarized (light)"'
 alias cal='vdirsyncer sync && ikhal'
-alias code='codium --ozone-platform=wayland --enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer'
+alias chrome='chromium-browser --ozone-platform=wayland'
+alias code='codium --ozone-platform=wayland --enable-features=UseOzonePlatform'
 
 # https://www.atlassian.com/git/tutorials/dotfiles
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
@@ -154,6 +155,7 @@ alias pdf='zathura'
 alias ps='ps fauxw'
 #alias ps='procs'
 alias reboot='systemctl reboot'
+alias rmr='rm -rf'
 #alias socat='socat -d -d'
 #alias ssh-apex='TERM=vt100 ssh -t 46692'
 #alias ssh-apex='TERM=xterm-256color ssh -t 46692'
@@ -188,7 +190,7 @@ alias j='jobs -l'
 
 # Resize images like `resize what where target_px`
 resize() {
-    convert $1 -filter Triangle -define filter:support=2 -thumbnail $3 -unsharp 0.25x0.25+8+0.065 -dither None -posterize 136 -quality 82 -define jpeg:fancy-upsampling=off -define png:compression-filter=5 -define png:compression-level=9 -define png:compression-strategy=1 -define png:exclude-chunk=all -interlace None -colorspace sRGB -strip $2
+    convert $1 -filter Triangle -define filter:support=2 -thumbnail $3 -unsharp 0.25x0.25+8+0.065 -dither None -posterize 136 -quality 82 -define jpeg:fancy-upsampling=off -define png:compression-filter=5 -define png:compression-level=9 -define png:compression-strategy=1 -define png:exclude-chunk=all -interlace None -colorspace sRGB -auto-orient -strip $2
 }
 
 # Record video from webcam, encode to x265 via GPU, drop duplicate frames and keep only last 5 mins
@@ -233,3 +235,11 @@ if [ -f "$HOME/"'.webpaas-cli/shell-config.rc' ]; then . "$HOME/"'.webpaas-cli/s
 HOME=${HOME:-'/home/rh'}
 export PATH="$HOME/"'.shopware-cli/bin':"$PATH"
 if [ -f "$HOME/"'.shopware-cli/shell-config.rc' ]; then . "$HOME/"'.shopware-cli/shell-config.rc'; fi # END SNIPPET
+
+eval "$(register-python-argcomplete hierat)"
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
