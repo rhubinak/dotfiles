@@ -1,0 +1,36 @@
+[general]
+status_path = "~/.vdirsyncer/status/"
+
+[pair birthdays]
+a = "birthdays_local"
+b = "birthdays_remote"
+collections = null
+
+[pair events]
+a = "events_local"
+b = "events_remote"
+collections = null
+
+[storage birthdays_local]
+type = "filesystem"
+path = "~/.config/vdirsyncer/calendars_monica"
+fileext = ".ics"
+
+[storage birthdays_remote]
+type = "caldav"
+url = "https://m.46692.dev/dav/calendars/rhubinak@tuta.io/birthdays"
+read_only = true
+username = "rhubinak@tuta.io"
+password.fetch = ["command", "pass", "vdirsyncer_birthdays"]
+
+[storage events_local]
+type = "filesystem"
+path = "~/.config/vdirsyncer/calendars"
+fileext = ".ics"
+
+[storage events_remote]
+type = "caldav"
+url = "https://dav.46692.dev/rh/408ff2ff-2e92-43a3-ac50-711e475ef2e1"
+read_only = true
+username = "rh"
+password.fetch = ["command", "pass", "vdirsyncer_events"]
