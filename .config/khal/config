@@ -1,10 +1,10 @@
 [calendars]
 [[calendar]]
-path = ~/.config/vdirsyncer/calendars/408ff2ff-2e92-43a3-ac50-711e475ef2e1/
+path = ~/.config/vdirsyncer/calendars/
 color = dark green
 
 [[birthdays]]
-path = ~/.config/vdirsyncer/calendars_monica/birthdays/
+path = ~/.config/vdirsyncer/calendars_monica/
 color = dark cyan
 
 [locale]

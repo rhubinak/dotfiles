@@ -11,7 +11,7 @@
 	diffFilter = delta --color-only
 
 [delta]
-	features = side-by-side line-numbers decorations
+	features = side-by-side line-numbers decorations solarized-light
 	whitespace-error-style = 22 reverse
 
 [delta "decorations"]
@@ -35,3 +35,9 @@
 # Include company creds for repos inside company dir
 [includeIf "gitdir:~/psh/**"]
 	path = ~/psh/.gitconfig
+
+[init]
+	defaultBranch = main
+
+[merge]
+	conflictstyle = zdiff3

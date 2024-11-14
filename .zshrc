@@ -9,7 +9,7 @@ fi
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/rh/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -30,14 +30,13 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Case-sensitive completion must be off. _ and - will be interchangeable.
 # HYPHEN_INSENSITIVE="true"
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to automatically update without prompting.
-# DISABLE_UPDATE_PROMPT="true"
+# Uncomment one of the following lines to change the auto-update behavior
+# zstyle ':omz:update' mode disabled  # disable automatic updates
+# zstyle ':omz:update' mode auto      # update automatically without asking
+# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
+# zstyle ':omz:update' frequency 13
 
 # Uncomment the following line if pasting URLs and other text is messed up.
 # DISABLE_MAGIC_FUNCTIONS="true"
@@ -52,6 +51,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
+# You can also set it to another string to have that shown instead of the default red dots.
+# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
+# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 # COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
@@ -104,7 +106,11 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-fpath+=${ZDOTDIR:-~}/.zsh_functions
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # User specific environment
 if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]
@@ -112,40 +118,28 @@ then
     PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 fi
 
-# Uncomment the following line if you don't like systemctl's auto-paging feature:
-# export SYSTEMD_PAGER=
-
-# User specific aliases and functions
-
-# BEGIN SNIPPET: Platform.sh CLI configuration
-HOME=${HOME:-'/home/rh'}
-export PATH="$HOME/"'.platformsh/bin':"$PATH"
-if [ -f "$HOME/"'.platformsh/shell-config.rc' ]; then . "$HOME/"'.platformsh/shell-config.rc'; fi # END SNIPPET
-
-# Load rust utils
-export PATH="$HOME/.cargo/bin:$PATH"
-
 # Load Platform.sh aliases
 test -r $HOME/psh/cse-aliases/cse-aliases.env && . $HOME/psh/cse-aliases/cse-aliases.env
 
 alias bc='bc -l'
+alias brave='brave-browser --enable-features=UseOzonePlatform --ozone-platform=wayland'
 alias c='bat -pp --theme="Solarized (light)"'
 alias cal='vdirsyncer sync && ikhal'
-alias chrome='chromium-browser --ozone-platform=wayland'
-alias code='codium --ozone-platform=wayland --enable-features=UseOzonePlatform'
+#alias chrome='chromium-browser --ozone-platform=wayland'
+alias code='codium --ozone-platform-hint=wayland'
 
 # https://www.atlassian.com/git/tutorials/dotfiles
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias df='df -H'
-alias du='dust'
-alias find='fd'
+#alias du='dust'
+#alias fd='bfs -name'
 
 # to search for files without match use --files-without-match
 alias grep='rg -i -n -uuu'
 
-#alias ls='exa -G  --color auto --icons -a -s type'
-alias l='exa -l --color always --icons -a -s type'
-alias m='mdcat'
+#alias ls='eza -G  --color auto --icons -a -s type'
+alias l='eza -l --color always --icons -a -s type'
+#alias m='mdcat'
 alias mkdir='mkdir -pv'
 alias mpv='mpv --stop-screensaver --gpu-context=wayland'
 alias n='nano'
@@ -154,19 +148,20 @@ alias pdf='zathura'
 #alias ports='netstat -tulanp'
 alias ps='ps fauxw'
 #alias ps='procs'
-alias reboot='systemctl reboot'
+alias reboot='/usr/sbin/reboot'
 alias rmr='rm -rf'
+alias shc='shellcheck --enable=all'
 #alias socat='socat -d -d'
 #alias ssh-apex='TERM=vt100 ssh -t 46692'
 #alias ssh-apex='TERM=xterm-256color ssh -t 46692'
 #alias ssh-46692='ssh -t apex'
-alias time='hyperfine'
+#alias time='hyperfine'
 alias top='htop'
 alias untar='tar -zxvf'
-alias vi=nvim
-alias v=nvim
+#alias vi=nvim
+#alias v=nvim
 alias ytdl='yt-dlp -x --audio-format "mp3" --audio-quality 0 --add-header "Cookie:"'
-alias zrc='nvim ~/.zshrc && source ~/.zshrc'
+#alias zrc='nvim ~/.zshrc && source ~/.zshrc'
 alias zzz='systemctl suspend && swaylock -f -e -c 000000'
 
 # git aliases (others provided by the git plugin)
@@ -200,46 +195,19 @@ alias record="ffmpeg -an -vaapi_device /dev/dri/renderD128 -f v4l2 -framerate 30
 if [ $UID -ne 0 ]; then
     alias dmesg='sudo dmesg'
     alias firewall='sudo nft list ruleset'
-    alias update='sudo dnf update && flatpak update'
+    alias update='sudo dnf update;flatpak update;brew update && brew upgrade'
     alias get='sudo dnf install'
 fi
 
 # Set a more restrictive umask. This makes newly created files only readable by the owner.
 umask 0077
 
-# BEGIN SNIPPET: SymfonyCloud (PHP) CLI configuration
-HOME=${HOME:-'/home/rh'}
-export PATH="$HOME/"'.symfony-cloud-cli/bin':"$PATH"
-if [ -f "$HOME/"'.symfony-cloud-cli/shell-config.rc' ]; then . "$HOME/"'.symfony-cloud-cli/shell-config.rc'; fi # END SNIPPET
-
 # BEGIN SNIPPET: Magento Cloud CLI configuration
 HOME=${HOME:-'/home/rh'}
 export PATH="$HOME/"'.magento-cloud/bin':"$PATH"
 if [ -f "$HOME/"'.magento-cloud/shell-config.rc' ]; then . "$HOME/"'.magento-cloud/shell-config.rc'; fi # END SNIPPET
 
-eval $(thefuck --alias)
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
 # BEGIN SNIPPET: OVHcloud Web PaaS CLI configuration
 HOME=${HOME:-'/home/rh'}
 export PATH="$HOME/"'.webpaas-cli/bin':"$PATH"
 if [ -f "$HOME/"'.webpaas-cli/shell-config.rc' ]; then . "$HOME/"'.webpaas-cli/shell-config.rc'; fi # END SNIPPET
-
-# BEGIN SNIPPET: Shopware PaaS CLI configuration
-HOME=${HOME:-'/home/rh'}
-export PATH="$HOME/"'.shopware-cli/bin':"$PATH"
-if [ -f "$HOME/"'.shopware-cli/shell-config.rc' ]; then . "$HOME/"'.shopware-cli/shell-config.rc'; fi # END SNIPPET
-
-eval "$(register-python-argcomplete hierat)"
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"

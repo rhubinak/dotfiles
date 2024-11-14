@@ -22,15 +22,6 @@ dnf upgrade --refresh
 
 # Use maildir instead of mbox
 
-gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
-gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll false
-
-#gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 50
-#gsettings set org.gnome.desktop.peripherals.keyboard delay 200
-
-#sed -i 's/i3/sway/g' /etc/sysconfig/desktop
-#/usr/share/lightdm/lighdm.conf.d/99-default.session.conf
-
 # Tweak dnf
 echo "fastestmirror=True" >> /etc/dnf/dnf.conf
 echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
@@ -40,29 +31,29 @@ dnf install \
     alacritty \
     awscli \
     bat \
+    black \
+    cargo \
     clang \
     clipman \
     cmus \
     dnf-plugin-system-upgrade \
     dnf-plugins-core \
-    exa \
     exfalso \
+    eza \
     fd-find \
-    ffmpeg \
     fira-code-fonts \
     firefox-wayland \
     flac \
+    flatpak \
     flameshot \
-    fwupd \
     gimp \
     git-delta \
     golang \
+    helix \
     htop \
     hugo \
     hyperfine \
     ImageMagick \
-    imv \
-    jq \
     just \
     khal \
     lame \
@@ -73,13 +64,10 @@ dnf install \
     make \
     mako \
     mp3gain \
-    mpv \
     mygnuhealth \
-    nano \
     ncdu \
     neofetch \
     neovim \
-    NetworkManager-tui \
     nnn \
     openssl-devel \
     p7zip \
@@ -88,25 +76,24 @@ dnf install \
     pass-otp \
     php \
     php-process \
-    pinentry-gtk \
+    pinentry-qt \
     powerline-fonts \
     pulseaudio-utils \
     pv \
+    pylint \
     python-lsp-server \
     python3-pip \
     qbittorrent \
     qt5-qtwayland \
     restic \
     ripgrep \
+    rust \
     rust-analyzer \
     sd \
     selinux-policy-devel \
     ShellCheck \
     sil-charis-fonts \
     skim \
-    sway \
-    swayidle \
-    swaylock \
     texlive-collection-xetex \
     texlive-eurosym \
     texlive-invoice2 \
@@ -115,12 +102,14 @@ dnf install \
     thefuck \
     tldr \
     util-linux-user \
-    waybar \
     wdisplays \
+    wf-recorder \
     wl-clipboard \
     wlsunset \
     wofi \
+    xarchiver \
     ydotool \
+    yt-dlp \
     zathura-pdf-mupdf \
     zsh
 
@@ -130,19 +119,21 @@ curl -sSL github.com/passff/passff-host/releases/latest/download/install_host_ap
 #sudo dnf copr enable atim/bottom -y
 #sudo dnf install bottom
 
-pip3 install --user black pylint yt-dlp
-
-# Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
 #cargo install rmesg
 cargo install du-dust
 
 # Markdown viewer
 cargo install mdcat
 
+# Painless compression and decompression in the terminal
+cargo install ouch
+
 # Tiny IRC client
 cargo install --git https://github.com/osa1/tiny
+
+# Update cargo stuff
+cargo install cargo-update
+cargo install-update -a
 
 # Nushell
 #cargo install nu --features=extra
@@ -161,26 +152,20 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 # Fira code nerd fonts
 mkdir -p /usr/share/fonts/nerd-fira
 curl -fLo "/usr/share/fonts/nerd-fira/Fira Code Regular Nerd Font Complete.otf" \
-    https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/complete/Fira%20Code%20Regular%20Nerd%20Font%20Complete.ttf
+    https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/FiraCodeNerdFont-Regular.ttf
 fc-cache -v
 
 # Set ZSH_THEME="powerlevel10k/powerlevel10k" in ~/.zshrc
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
 # Helix
-sudo dnf copr enable varlad/helix
-sudo dnf install helix
-go install golang.org/x/tools/gopls@latest
+dnf copr enable titaniumtown/lapce
+dnf install lapce
 
-#rustup component add rust-src
-#curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-x86_64-unknown-linux-gnu.gz | gunzip -c - > ~/.local/bin/rust-analyzer
-#chmod +x ~/.local/bin/rust-analyzer
-#go get github.com/lighttiger2505/sqls
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 nvm install node
 npm install -g bash-language-server dockerfile-language-server-nodejs pyright vscode-langservers-extracted yaml-language-server
 cargo install --git https://github.com/latex-lsp/texlab.git --locked
-#Restart neovim and run :PlugInstall to install
 
 # Upgrade NodeJS
 # nvm install stable --reinstall-packages-from=current
@@ -229,20 +214,6 @@ dnf config-manager --add-repo https://rpm.librewolf.net
 dnf update
 dnf install librewolf
 
-# Librewolf: remove microphone indicator
-# Set toolkit.legacyUserProfileCustomizations.stylesheets to True in about:config
-cd ~/.librewolf/
-if [[ $(grep '\[Profile[^0]\]' profiles.ini) ]]
-then PROFPATH=$(grep -E '^\[Profile|^Path|^Default' profiles.ini | grep -1 '^Default=1' | grep '^Path' | cut -c6-)
-else PROFPATH=$(grep 'Path=' profiles.ini | sed 's/^Path=//')
-fi
-mkdir $PROFPATH/chrome
-cat > $PROFPATH/chrome/userChrome.css << "EOF"
-#webrtcIndicator {
-  display: none;
-}
-EOF
-
 # Remove unneeded stuff
 dnf remove \
     evince \
@@ -256,6 +227,7 @@ dnf remove \
     gnome-video-effects \
     gnome-weather \
     httpd \
+    network-manager-applet \
     rhythmbox \
     totem \
     totem-pl-parser \
@@ -263,16 +235,6 @@ dnf remove \
 
 systemctl stop bluetooth.service
 systemctl disable bluetooth.service
-
-# iwd
-dnf remove wpa_supplicant
-echo '[device]' >> /etc/NetworkManager/NetworkManager.conf
-echo 'wifi.backend=iwd' >> /etc/NetworkManager/NetworkManager.conf
-echo '[Network]' >> /etc/iwd/main.conf
-echo 'EnableIPv6=true' >> /etc/iwd/main.conf
-echo '[Settings]' >> /etc/iwd/main.conf
-echo 'AutoConnect=true' >> /etc/iwd/main.conf
-systemctl restart NetworkManager
 
 ## Kernel hardening
 cat > /etc/sysctl.d/99-sysctl.conf << "EOF"
@@ -418,8 +380,8 @@ echo 'DNSSEC=yes' >> /etc/systemd/resolved.conf
 #sudo dnf install brave-browser brave-keyring
 
 # Workaround until the official repo plays nicely
-flatpak remote-add --if-not-exists flathub-beta https://flathub.org/beta-repo/flathub-beta.flatpakrepo
-flatpak install flathub-beta com.brave.Browser
+#flatpak remote-add --if-not-exists flathub-beta https://flathub.org/beta-repo/flathub-beta.flatpakrepo
+#flatpak install flathub-beta com.brave.Browser
 
 # configure MPV autosub
 pip3 install subliminal
@@ -443,23 +405,31 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 flatpak install flathub org.signal.Signal
 
 # Tutanota
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install flathub com.tutanota.Tutanota
+#flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+#flatpak install flathub com.tutanota.Tutanota
 
 # Terminalizer
-npm i -g terminalizer
+#npm i -g terminalizer
 
 # PurgeCSS
-npm i -g purgecss
+#npm i -g purgecss
 
 # Make phone work
-dnf install jmtpfs
-mkdir ~/phone
-chmod 755 ~/phone
+#dnf install jmtpfs
+#mkdir ~/phone
+#chmod 755 ~/phone
 # Connect
-jmtpfs ~/phone
+#jmtpfs ~/phone
 # Disconnect
-fusermount -u ~/phone
+#fusermount -u ~/phone
 
 # yq
 wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /home/rh/.local/bin/yq && chmod +x /home/rh/.local/bin/yq
+
+# Restic
+# Troubleshoot locks with restic list locks and restic unlock --remove-all
+systemctl daemon-reload --user
+systemctl start restic-backup --user
+systemctl start restic-prune --user
+systemctl enable --now restic-backup.timer --user
+systemctl enable --now restic-prune.timer --user
