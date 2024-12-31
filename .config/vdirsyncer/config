@@ -20,7 +20,7 @@ fileext = ".ics"
 type = "caldav"
 url = "https://m.46692.dev/dav/calendars/rhubinak@tuta.io/birthdays"
 read_only = true
-username = "rhubinak@tuta.io"
+username.fetch = ["command", "pass", "email"]
 password.fetch = ["command", "pass", "vdirsyncer_birthdays"]
 
 [storage events_local]
